@@ -1,0 +1,37 @@
+{% extends 'staff/base_staff.html' %}
+
+{% block title %}Profil Sozlamalari - Smart Cafe Admin{% endblock %}
+{% block page_title %}Profil Sozlamalari{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 500px; margin: 0 auto; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <h3 style="margin-bottom: 20px; font-size: 1.4rem; font-weight: 600; color: var(--accent);"><i class="fas fa-user-cog"></i> Hisob Sozlamalari</h3>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; {% if message.tags == 'success' %}background: rgba(46, 204, 113, 0.15); border: 1px solid rgba(46, 204, 113, 0.3); color: #2ecc71;{% else %}background: rgba(231, 76, 60, 0.15); border: 1px solid rgba(231, 76, 60, 0.3); color: #e74c3c;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem;">Foydalanuvchi nomi (Username)</label>
+            <input type="text" name="username" class="btn btn-outline" style="width: 100%; text-align: left; background: rgba(255,255,255,0.03); color: #fff;" value="{{ request.user.username }}" required autocomplete="username">
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem;">Yangi parol (Password)</label>
+            <input type="password" name="password" class="btn btn-outline" style="width: 100%; text-align: left; background: rgba(255,255,255,0.03); color: #fff;" placeholder="Yangi parol (o'zgartirish uchun yozing)" autocomplete="new-password">
+            <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4); display: block; margin-top: 5px;">* Parolni o'zgartirmoqchi bo'lsangiz yozing, aks holda bo'sh qoldiring.</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; justify-content: center; font-weight: 600;">
+            <i class="fas fa-save"></i> O'zgarishlarni saqlash
+        </button>
+    </form>
+</div>
+{% endblock %}

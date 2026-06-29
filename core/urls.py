@@ -12,6 +12,9 @@ urlpatterns = [
     path('complete/<int:table_id>/', views.complete_session, name='complete_session'),
 
     # Staff Admin Panel Page Routes
+    path('staff/login/', admin_views.staff_login_view, name='staff_login'),
+    path('staff/logout/', admin_views.staff_logout_view, name='staff_logout'),
+    path('staff/settings/', admin_views.staff_settings_view, name='staff_settings'),
     path('staff/', admin_views.dashboard, name='staff_dashboard'),
     path('staff/orders/', admin_views.order_list, name='staff_orders'),
     path('staff/calls/', admin_views.waiter_calls, name='staff_calls'),

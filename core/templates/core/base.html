@@ -218,8 +218,10 @@
             <a href="{% url 'core:menu' table_id %}" title="Menyu"><i class="fas fa-book-open"></i></a>
             <a href="{% url 'core:cart' table_id %}" title="Savat"><i class="fas fa-shopping-cart"></i></a>
             {% endif %}
-            {% if request.user.is_staff %}
-            <a href="{% url 'core:staff_dashboard' %}" title="Admin Panel"><i class="fas fa-user-shield"></i></a>
+            {% if request.user.is_authenticated and request.user.is_staff %}
+            <a href="{% url 'core:staff_dashboard' %}" title="Boshqaruv Paneli"><i class="fas fa-user-shield"></i></a>
+            {% else %}
+            <a href="{% url 'core:staff_login' %}" title="Xodimlar Tizimi"><i class="fas fa-sign-in-alt"></i></a>
             {% endif %}
         </div>
     </header>
