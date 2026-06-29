@@ -335,6 +335,71 @@ paths:
         '200':
           description: Success
 
+  /waiter-calls/active/{table_id}/:
+    get:
+      tags:
+        - Customer - Services & Feedback
+      summary: Get list of active waiter calls for a table session
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/messages/:
+    get:
+      tags:
+        - Customer - Services & Feedback
+      summary: Get list of chat messages for a table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mark_read
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [true, false]
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/messages/send/:
+    post:
+      tags:
+        - Customer - Services & Feedback
+      summary: Send a chat message from table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                sender:
+                  type: string
+                  enum: [customer, staff]
+                  default: customer
+      responses:
+        '200':
+          description: Success
+
   /feedback/{table_id}/:
     post:
       tags:
@@ -451,6 +516,15 @@ paths:
                 reply_message:
                   type: string
                   default: Xodim yo'lda
+      responses:
+        '200':
+          description: Success
+
+  /staff/messages/:
+    get:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Get active chat contact list of tables with messages (requires staff login)
       responses:
         '200':
           description: Success
