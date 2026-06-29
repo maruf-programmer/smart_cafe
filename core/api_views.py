@@ -62,6 +62,12 @@ def occupy_table(request, table_id):
 @api_view(['POST'])
 def free_table(request, table_id):
     table = get_object_or_404(Table, id=table_id)
+    from orders.models import Order
+    from django.utils import timezone
+    Order.objects.filter(
+        table=table,
+        status__in=['pending', 'confirmed', 'preparing', 'ready', 'delivered']
+    ).update(status='completed', completed_at=timezone.now())
     table.free_table()
     return Response({'status': 'success', 'message': f'Stol #{table.number} tozalanmoqda.'})
 

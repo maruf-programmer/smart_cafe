@@ -151,10 +151,27 @@
                     `;
                 } else {
                     badgeHTML = `<span class="badge badge-danger">Kutilmoqda</span>`;
+                    const isCashCall = call.reason && call.reason.toLowerCase().includes('naqd');
+                    let cashBtnHTML = '';
+                    if (isCashCall) {
+                        cashBtnHTML = `
+                            <button onclick="finalizePaymentAndTable(${call.id}, ${call.table_detail.id})" class="btn btn-success" style="width: 100%; font-weight: 600; margin-top: 8px; justify-content: center; background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                                <i class="fas fa-money-check-alt"></i> To'lovni Qabul Qilish & Yakunlash
+                            </button>
+                        `;
+                    }
                     actionHTML = `
                         <div class="resolve-form">
-                            <input type="text" id="reply-${call.id}" placeholder="Javob xabari..." class="btn btn-outline" value="Xodim yo'lda">
-                            <button onclick="resolveCall(${call.id})" class="btn btn-primary">Javob berish</button>
+                            <input type="text" id="reply-${call.id}" placeholder="Javob xabari..." class="btn btn-outline" value="Yo'ldaman">
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="resolveCall(${call.id}, 'Yo\\'ldaman')" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.8rem; padding: 10px 5px;">
+                                    Yo'ldaman
+                                </button>
+                                <button onclick="resolveCall(${call.id})" class="btn btn-primary" style="flex: 1; justify-content: center; font-size: 0.8rem; padding: 10px 5px;">
+                                    Javob berish
+                                </button>
+                            </div>
+                            ${cashBtnHTML}
                         </div>
                     `;
                 }
@@ -184,9 +201,9 @@
         }
     }
 
-    async function resolveCall(callId) {
+    async function resolveCall(callId, customMessage) {
         const replyInput = document.getElementById(`reply-${callId}`);
-        const reply_message = replyInput ? replyInput.value : 'Xodim yo\'lda';
+        const reply_message = customMessage || (replyInput ? replyInput.value : 'Xodim yo\'lda');
         
         try {
             const res = await fetch(`/api/staff/calls/${callId}/resolve/`, {
@@ -206,6 +223,44 @@
             }
         } catch (err) {
             console.error('Resolve call error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    async function finalizePaymentAndTable(callId, tableId) {
+        if (!confirm("Ushbu stoldan naqd to'lov qabul qilinganligini va sessiyani yakunlamoqchi ekanligingizni tasdiqlaysizmi?")) {
+            return;
+        }
+        
+        try {
+            let res = await fetch(`/api/staff/calls/${callId}/resolve/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reply_message: "To'lov qabul qilindi. Sessiya yakunlandi." })
+            });
+            
+            if (!res.ok) {
+                showMessage("Chaqiruvni yopishda xatolik yuz berdi", "error");
+                return;
+            }
+
+            res = await fetch(`/api/tables/${tableId}/free/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            
+            if (res.ok) {
+                showMessage("To'lov qabul qilindi va stol bo'shatildi!", "success");
+                loadCalls();
+            } else {
+                const data = await res.json();
+                showMessage(data.error || 'Stolni bo\'shatishda xatolik yuz berdi', 'error');
+            }
+        } catch (err) {
+            console.error('Finalize payment error:', err);
             showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
         }
     }

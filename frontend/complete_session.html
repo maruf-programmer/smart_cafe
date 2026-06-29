@@ -389,6 +389,54 @@
     }
 
     .session-timer i { color: var(--orange); margin-right: 5px; }
+
+    /* Chat bubble and status styling */
+    .chat-bubble {
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    .chat-bubble.customer {
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+    .chat-bubble.waiter {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+    }
+    .status-glowing-green {
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(46, 204, 113, 0.1);
+        border: 1px solid rgba(46, 204, 113, 0.3);
+        color: #2ecc71;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .status-glowing-yellow {
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(241, 196, 15, 0.1);
+        border: 1px solid rgba(241, 196, 15, 0.3);
+        color: #f1c40f;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 </style>
 </head>
 <body>
@@ -473,13 +521,43 @@
 
         <form id="completeSessionForm">
             <input type="hidden" id="paymentMethod" value="cash">
-            <div class="action-buttons">
+            <div id="defaultActionButtons" class="action-buttons" style="display: none;">
                 <button type="button" onclick="completeSession('pay')" class="btn btn-success">
                     <i class="fas fa-check-circle"></i> To'lov qilish va yakunlash
                 </button>
                 <button type="button" onclick="completeSession('free')" class="btn btn-secondary">
                     <i class="fas fa-times"></i> Bepul (bekor qilish)
                 </button>
+            </div>
+
+            <!-- Cash Payment Panel (Waiter Call & Chat) -->
+            <div id="cashPaymentPanel" style="margin-top: 25px;">
+                <div class="glass-card" style="padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-align: left; margin-bottom: 20px;">
+                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 12px;"><i class="fas fa-receipt"></i> Chek to'lash tartibi</h4>
+                    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 15px;">
+                        Naqd pul orqali to'lash uchun quyidagi tugmani bosib ofitsiantni chaqiring. Ofitsiant kelib to'lovni oladi va stolni yakunlaydi.
+                    </p>
+                    <div id="waiterStatusArea" style="margin-bottom: 15px;">
+                        <!-- Status here -->
+                    </div>
+                    <button id="btnCallWaiter" type="button" onclick="requestWaiterForCash()" class="btn btn-success" style="width: 100%; justify-content: center; padding: 14px; font-weight: 600;">
+                        <i class="fas fa-bell"></i> Ofitsiantni Chaqirish (Naqd to'lov)
+                    </button>
+                </div>
+
+                <!-- Chat Container -->
+                <div class="glass-card" style="padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-align: left;">
+                    <h4 style="font-size: 1.1rem; color: var(--green-light); margin-bottom: 12px;"><i class="fas fa-comments"></i> Admin/Ofitsiant bilan chat</h4>
+                    
+                    <div id="chatMessages" style="height: 180px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem; text-align: center; margin-top: 70px;">Chat bo'sh. Chaqiruv yuborilgach chat faollashadi.</div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="chatInput" placeholder="Xabar yozing..." class="btn btn-outline" style="flex: 1; text-align: left; background: rgba(255,255,255,0.05); color: #fff; padding: 10px 15px;" onkeypress="handleChatKey(event)">
+                        <button type="button" onclick="sendChatMessage()" class="btn btn-primary" style="padding: 10px 20px;">Yuborish</button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -514,10 +592,168 @@
     <script>
     const tableId = "{{ table_id }}";
 
+    let pollInterval = null;
+
     function selectPayment(btn, method) {
         document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('paymentMethod').value = method;
+
+        const cashPanel = document.getElementById('cashPaymentPanel');
+        const defaultActions = document.getElementById('defaultActionButtons');
+
+        if (method === 'cash') {
+            cashPanel.style.display = 'block';
+            defaultActions.style.display = 'none';
+            startChatPolling();
+        } else {
+            cashPanel.style.display = 'none';
+            defaultActions.style.display = 'flex';
+            stopChatPolling();
+        }
+    }
+
+    function startChatPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollActiveCalls();
+        pollInterval = setInterval(pollActiveCalls, 3000);
+    }
+
+    function stopChatPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+
+    async function pollActiveCalls() {
+        try {
+            const tableRes = await fetch(API_BASE_URL + '/api/tables/', { credentials: 'include' });
+            const tables = await tableRes.json();
+            const table = tables.find(t => t.id == tableId);
+            
+            if (table && (table.status === 'cleaning' || table.status === 'free')) {
+                stopChatPolling();
+                document.getElementById('sessionContainer').innerHTML = `
+                    <div class="success-animation">
+                        <div class="checkmark"><i class="fas fa-check"></i></div>
+                        <h2>Stol yakunlandi!</h2>
+                        <p style="color: rgba(255,255,255,0.6);">To'lov qabul qilindi. Tashrifingiz uchun rahmat!</p>
+                        <a href="/" class="btn btn-success" style="margin-top: 20px;">
+                            <i class="fas fa-home"></i> Bosh sahifaga qaytish
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const res = await fetch(API_BASE_URL + `/api/waiter-calls/active/${tableId}/`, { credentials: 'include' });
+            if (!res.ok) return;
+            const calls = await res.json();
+
+            const chatMessages = document.getElementById('chatMessages');
+            const waiterStatusArea = document.getElementById('waiterStatusArea');
+            const btnCallWaiter = document.getElementById('btnCallWaiter');
+
+            if (calls.length === 0) {
+                chatMessages.innerHTML = `<div style="color: rgba(255,255,255,0.4); font-size: 0.8rem; text-align: center; margin-top: 70px;">Chat bo'sh. Chaqiruv yuborilgach chat faollashadi.</div>`;
+                waiterStatusArea.innerHTML = '';
+                btnCallWaiter.style.display = 'block';
+                return;
+            }
+
+            chatMessages.innerHTML = '';
+            calls.forEach(call => {
+                chatMessages.innerHTML += `
+                    <div class="chat-bubble customer">
+                        ${call.reason}
+                    </div>
+                `;
+                
+                if (call.is_answered && call.reply_message) {
+                    chatMessages.innerHTML += `
+                        <div class="chat-bubble waiter">
+                            ${call.reply_message}
+                        </div>
+                    `;
+                }
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const latestCall = calls[calls.length - 1];
+            if (!latestCall.is_answered) {
+                waiterStatusArea.innerHTML = `
+                    <div class="status-glowing-yellow">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Ofitsiant chaqirildi! Kutilmoqda...</span>
+                    </div>
+                `;
+                btnCallWaiter.style.display = 'none';
+            } else {
+                waiterStatusArea.innerHTML = `
+                    <div class="status-glowing-green">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Ofitsiant javobi: "${latestCall.reply_message}"</span>
+                    </div>
+                `;
+                btnCallWaiter.style.display = 'block';
+                btnCallWaiter.innerHTML = `<i class="fas fa-bell"></i> Ofitsiantni qayta chaqirish`;
+            }
+        } catch (err) {
+            console.error('Polling calls error:', err);
+        }
+    }
+
+    async function requestWaiterForCash() {
+        try {
+            const res = await fetch(`/api/waiter-calls/call/${tableId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reason: "Naqd pul to'lamoqchi" })
+            });
+            if (res.ok) {
+                showMessage("Ofitsiant chaqirildi!", "success");
+                pollActiveCalls();
+            } else {
+                showMessage("Chaqiruvda xatolik yuz berdi", "error");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+            const res = await fetch(`/api/waiter-calls/call/${tableId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reason: text })
+            });
+            if (res.ok) {
+                input.value = '';
+                pollActiveCalls();
+            } else {
+                showMessage("Xabar yuborilmadi", "error");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function handleChatKey(e) {
+        if (e.key === 'Enter') {
+            sendChatMessage();
+        }
     }
 
     async function initSession() {
@@ -619,6 +855,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initSession();
+        startChatPolling();
     });
 </script>
 </body>

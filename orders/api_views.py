@@ -197,6 +197,19 @@ def get_latest_call(request, table_id):
     return Response({'message': 'Chaqiruvlar yo\'q'}, status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(['GET'])
+def get_active_calls(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    from django.utils import timezone
+    if table.current_session_start:
+        calls = WaiterCall.objects.filter(table=table, created_at__gte=table.current_session_start).order_by('created_at')
+    else:
+        two_hours_ago = timezone.now() - timezone.timedelta(hours=2)
+        calls = WaiterCall.objects.filter(table=table, created_at__gte=two_hours_ago).order_by('created_at')
+    serializer = WaiterCallSerializer(calls, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def reply_to_call_api(request, call_id):
