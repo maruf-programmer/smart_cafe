@@ -3,47 +3,238 @@
 {% block title %}Menyu - Cafe Admin{% endblock %}
 {% block page_title %}Menyu boshqaruvi{% endblock %}
 
+{% block extra_css %}
+<style>
+    .menu-page-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(rgba(11, 15, 25, 0.85), rgba(17, 24, 39, 0.95)), 
+                    url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+        z-index: -1;
+    }
+    
+    .card-category {
+        margin-bottom: 40px;
+    }
+    
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(255,255,255,0.05);
+    }
+    
+    .category-header h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ffffff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+    
+    .menu-item-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s;
+    }
+    
+    .menu-item-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .item-image {
+        height: 160px;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: rgba(255,255,255,0.1);
+        position: relative;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-availability {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .item-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .item-body h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #fff;
+    }
+    
+    .item-body .price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #f39c12;
+        margin-bottom: 15px;
+    }
+    
+    .item-actions {
+        margin-top: auto;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .item-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
 {% block top_actions %}
 <a href="{% url 'core:menu_item_add' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Yangi taom</a>
 {% endblock %}
 
 {% block content %}
-{% for category in categories %}
-<div class="card">
-    <div class="card-header">
-        <h3>{{ category.name }}</h3>
-        <span class="badge badge-info">{{ category.items.count }} ta taom</span>
-    </div>
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th>Taom nomi</th>
-                    <th>Narxi</th>
-                    <th>Holat</th>
-                    <th>Harakat</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in category.items.all %}
-                <tr>
-                    <td><strong>{{ item.name }}</strong></td>
-                    <td>{{ item.price }} so'm</td>
-                    <td>
-                        {% if item.is_available %}
-                        <span class="badge badge-success">Mavjud</span>
-                        {% else %}
-                        <span class="badge badge-danger">Tugagan</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'core:menu_item_edit' item.id %}" class="btn btn-outline" style="padding: 4px 10px;"><i class="fas fa-edit"></i></a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="menu-page-bg"></div>
+
+<div id="categoriesContainer">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>
 </div>
-{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadMenu() {
+        try {
+            const res = await fetch('/api/staff/menu/');
+            if (!res.ok) return;
+            const categories = await res.json();
+            
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = '';
+            
+            if (categories.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Hozircha menyular mavjud emas</div>`;
+                return;
+            }
+            
+            categories.forEach(category => {
+                let itemsHTML = '';
+                if (category.items.length === 0) {
+                    itemsHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted); grid-column: 1/-1;">Bu kategoriyada taomlar yo'q</div>`;
+                } else {
+                    category.items.forEach(item => {
+                        const statusBadge = item.is_available 
+                            ? `<span class="badge badge-success">Mavjud</span>` 
+                            : `<span class="badge badge-danger">Tugagan</span>`;
+                            
+                        const imgHTML = item.image 
+                            ? `<img src="${item.image.startsWith('http') || item.image.startsWith('data:') ? item.image : (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '') + item.image}" alt="${item.name}">` 
+                            : `<i class="fas fa-utensils"></i>`;
+                            
+                        itemsHTML += `
+                            <div class="menu-item-card">
+                                <div class="item-image">
+                                    ${imgHTML}
+                                    <div class="item-availability">${statusBadge}</div>
+                                </div>
+                                <div class="item-body">
+                                    <h4>${item.name}</h4>
+                                    <div class="price">${Number(item.price).toLocaleString()} so'm</div>
+                                     <div class="item-actions">
+                                         <a href="/staff/menu/item/${item.id}/edit/" class="btn btn-outline"><i class="fas fa-edit"></i> Tahrirlash</a>
+                                         <button onclick="deleteMenuItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="btn btn-danger" style="background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; font-size: 0.8rem; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #fff; cursor: pointer; border-radius: 12px;"><i class="fas fa-trash-alt"></i> O'chirish</button>
+                                     </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                container.innerHTML += `
+                    <div class="card-category">
+                        <div class="category-header">
+                            <h3>${category.name}</h3>
+                            <span class="badge badge-info">${category.items.length} ta taom</span>
+                        </div>
+                        <div class="menu-grid">
+                            ${itemsHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Menu load error:', err);
+        }
+    }
+
+    async function deleteMenuItem(itemId, itemName) {
+        if (!confirm(`Haqiqatan ham "${itemName}" taomini menyudan butunlay o'chirmoqchimisiz?\n(Ushbu amalni ortga qaytarib bo'lmaydi!)`)) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/staff/menu/item/${itemId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadMenu();
+            } else {
+                showMessage(data.error || "O'chirishda xatolik yuz berdi", 'error');
+            }
+        } catch (err) {
+            console.error('Delete menu item error:', err);
+            showMessage("Tizim bilan bog'lanishda xatolik", 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadMenu();
+    });
+</script>
 {% endblock %}

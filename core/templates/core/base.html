@@ -218,10 +218,13 @@
             <a href="{% url 'core:menu' table_id %}" title="Menyu"><i class="fas fa-book-open"></i></a>
             <a href="{% url 'core:cart' table_id %}" title="Savat"><i class="fas fa-shopping-cart"></i></a>
             {% endif %}
+            {% if request.user.is_staff %}
             <a href="{% url 'core:staff_dashboard' %}" title="Admin Panel"><i class="fas fa-user-shield"></i></a>
+            {% endif %}
         </div>
     </header>
 
+    <div class="messages" id="js-messages"></div>
     {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -236,9 +239,21 @@
         &copy;  Cafe Tizimi. Barcha huquqlar himoyalangan.
     </footer>
 
-    {% block extra_js %}{% endblock %}
-
     <script>
+        function showMessage(text, type='success') {
+            const container = document.getElementById('js-messages');
+            if(!container) return;
+            const msg = document.createElement('div');
+            msg.className = `message message-${type}`;
+            msg.innerText = text;
+            container.appendChild(msg);
+            setTimeout(() => {
+                msg.style.transition = 'opacity 0.5s';
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 500);
+            }, 4000);
+        }
+
         setTimeout(() => {
             document.querySelectorAll('.message').forEach(el => {
                 el.style.opacity = '0';
@@ -246,5 +261,6 @@
             });
         }, 4000);
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

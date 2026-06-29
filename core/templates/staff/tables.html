@@ -118,6 +118,7 @@
     .status-free { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
     .status-occupied { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
     .status-reserved { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .status-cleaning { color: #55efc4; text-shadow: 0 0 10px rgba(85, 239, 196, 0.5); }
 
     .status-select {
         width: 100%;
@@ -151,11 +152,10 @@
 {% block content %}
 <div class="glass-card">
     <h3 style="margin-bottom: 20px;"><i class="fas fa-tools"></i> Yangi Stol O'rnatish</h3>
-    <form action="{% url 'core:add_table' %}" method="POST" class="add-table-form">
-        {% csrf_token %}
+    <form id="addTableForm" class="add-table-form">
         <div class="form-group">
             <label>Stol Raqami</label>
-            <input type="number" name="number" placeholder="Masalan: 12" required class="form-control">
+            <input type="number" id="tableNumInput" placeholder="Masalan: 12" required class="form-control">
         </div>
         <button type="submit" class="btn-add">
             <i class="fas fa-plus"></i> Stol Qo'shish
@@ -163,31 +163,156 @@
     </form>
 </div>
 
-<div class="table-grid">
-    {% for table in tables %}
-    <div class="table-card">
-        <div class="status-icon">
-            <i class="fas fa-chair {% if table.status == 'free' %}status-free{% elif table.status == 'occupied' %}status-occupied{% else %}status-reserved{% endif %}"></i>
-        </div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 5px;">Stol #{{ table.number }}</h3>
-        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6);">
-            {{ table.get_status_display }}
-        </span>
-        
-        <form action="{% url 'core:update_table_status' table.id %}" method="POST">
-            {% csrf_token %}
-            <select name="status" onchange="this.form.submit()" class="status-select">
-                <option value="free" {% if table.status == 'free' %}selected{% endif %}>Bo'sh (Free)</option>
-                <option value="occupied" {% if table.status == 'occupied' %}selected{% endif %}>Band (Occupied)</option>
-                <option value="reserved" {% if table.status == 'reserved' %}selected{% endif %}>Bron (Reserved)</option>
-                <option value="cleaning" {% if table.status == 'cleaning' %}selected{% endif %}>Tozalash (Cleaning)</option>
-            </select>
-        </form>
-        
-        <a href="{% url 'core:menu' table.id %}" target="_blank" class="qr-link">
-            <i class="fas fa-qrcode"></i> QR Menyu Ko'rish
-        </a>
-    </div>
-    {% endfor %}
+<div class="table-grid" id="tablesGrid">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Yuklanmoqda...</div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadTables() {
+        try {
+            const res = await fetch('/api/staff/tables/');
+            if (!res.ok) return;
+            const tables = await res.json();
+            
+            const grid = document.getElementById('tablesGrid');
+            grid.innerHTML = '';
+            
+            if (tables.length === 0) {
+                grid.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Stollar topilmadi</div>`;
+                return;
+            }
+            
+            tables.forEach(table => {
+                let statusIconClass = 'status-reserved';
+                if (table.status === 'free') statusIconClass = 'status-free';
+                else if (table.status === 'occupied') statusIconClass = 'status-occupied';
+                else if (table.status === 'cleaning') statusIconClass = 'status-cleaning';
+                
+                grid.innerHTML += `
+                    <div class="table-card">
+                        <div class="status-icon">
+                            <i class="fas fa-chair ${statusIconClass}"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 5px;">Stol #${table.number}</h3>
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6);">
+                            ${table.status_display}
+                        </span>
+                        
+                        <select onchange="updateTableStatus(${table.id}, this.value)" class="status-select">
+                            <option value="free" ${table.status === 'free' ? 'selected' : ''}>Bo'sh (Free)</option>
+                            <option value="occupied" ${table.status === 'occupied' ? 'selected' : ''}>Band (Occupied)</option>
+                            <option value="reserved" ${table.status === 'reserved' ? 'selected' : ''}>Bron (Reserved)</option>
+                            <option value="cleaning" ${table.status === 'cleaning' ? 'selected' : ''}>Tozalash (Cleaning)</option>
+                        </select>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <a href="/menu/${table.id}/" target="_blank" class="qr-link" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                <i class="fas fa-qrcode"></i> QR Menyu
+                            </a>
+                            <button onclick="deleteTable(${table.id}, ${table.number})" class="btn btn-danger" style="flex: 1; padding: 10px; font-size: 0.85rem; background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; color: #fff; cursor: pointer; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);" title="Stolni o'chirish">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Tables load error:', err);
+        }
+    }
+
+    async function updateTableStatus(tableId, status) {
+        try {
+            const res = await fetch(`/api/staff/tables/${tableId}/status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadTables();
+            } else {
+                showMessage(data.error || 'Yangilashda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Update status error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    async function deleteTable(tableId, tableNumber) {
+        if (!confirm(`Haqiqatan ham #${tableNumber}-stolni butunlay o'chirmoqchimisiz?\n(Ushbu stoldagi barcha faol buyurtmalar va sessiyalar o'chib ketadi!)`)) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/staff/tables/${tableId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadTables();
+            } else {
+                showMessage(data.error || "O'chirishda xatolik yuz berdi", 'error');
+            }
+        } catch (err) {
+            console.error('Delete table error:', err);
+            showMessage("Tizim bilan bog'lanishda xatolik", 'error');
+        }
+    }
+
+    document.getElementById('addTableForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const number = parseInt(document.getElementById('tableNumInput').value);
+        try {
+            const res = await fetch('/api/staff/tables/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ number })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                document.getElementById('tableNumInput').value = '';
+                loadTables();
+            } else {
+                showMessage(data.error || 'Qo\'shishda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Add table error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTables();
+    });
+</script>
 {% endblock %}

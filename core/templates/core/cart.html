@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Savat - Stol #{{ table.number }}{% endblock %}
+{% block title %}Savat{% endblock %}
 {% block header_title %}Savat{% endblock %}
 
 {% block extra_css %}
@@ -142,56 +142,144 @@
         <a href="{% url 'core:my_orders' table_id %}" class="btn btn-secondary"><i class="fas fa-list"></i> Buyurtmalarim</a>
     </div>
 
-    {% if cart_items %}
-    {% for item in cart_items %}
-    <div class="cart-item card">
-        <div class="cart-item-img">
-            {% if item.menu_item.image %}
-            <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}">
-            {% else %}
-            <div class="placeholder"><i class="fas fa-utensils"></i></div>
-            {% endif %}
-        </div>
-        <div class="cart-item-info">
-            <h4>{{ item.menu_item.name }}</h4>
-            <div class="details">{{ item.servings }} kishilik · {{ item.quantity }} dona · {{ item.menu_item.prep_time_display }}</div>
-            <div class="item-price">{{ item.subtotal }} so'm</div>
-        </div>
-        <div class="cart-item-actions">
-            
-                {% csrf_token %}
-                <button type="submit" class="remove-btn"><i class="fas fa-trash"></i></button>
-            </form>
-        </div>
+    <div id="cart-container">
+        <!-- Loaded dynamically -->
     </div>
-    {% endfor %}
-
-    <div class="cart-summary">
-        <div class="summary-row">
-            <span>Taomlar soni:</span>
-            <span>{{ cart_items|length }} ta</span>
-        </div>
-        <div class="summary-row total">
-            <span>Jami:</span>
-            <span>{{ total_price }} so'm</span>
-        </div>
-        <form method="post" action="{% url 'core:checkout' table_id %}">
-            {% csrf_token %}
-            <div class="form-group" style="margin-top: 15px;">
-                <textarea name="notes" rows="2" placeholder="Qo'shimcha eslatma (ixtiyoriy)" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-family: inherit;"></textarea>
-            </div>
-            <button type="submit" class="btn btn-success checkout-btn">
-                <i class="fas fa-paper-plane"></i> Buyurtma berish
-            </button>
-        </form>
-    </div>
-    {% else %}
-    <div class="cart-empty">
-        <i class="fas fa-shopping-cart"></i>
-        <h3>Savat bo'sh</h3>
-        <p style="color: rgba(255,255,255,0.5); margin-bottom: 20px;">Taomlarni tanlab, savatga qo'shing</p>
-        <a href="{% url 'core:menu' table_id %}" class="btn btn-primary"><i class="fas fa-utensils"></i> Menyuni ko'rish</a>
-    </div>
-    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const tableId = "{{ table_id }}";
+
+    async function loadCart() {
+        try {
+            const res = await fetch(`/api/cart/${tableId}/`);
+            const data = await res.json();
+            const container = document.getElementById('cart-container');
+            
+            if (!data.cart_items || data.cart_items.length === 0) {
+                container.innerHTML = `
+                    <div class="cart-empty">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Savat bo'sh</h3>
+                        <p style="color: rgba(255,255,255,0.5); margin-bottom: 20px;">Taomlarni tanlab, savatga qo'shing</p>
+                        <a href="/menu/${tableId}/" class="btn btn-primary"><i class="fas fa-utensils"></i> Menyuni ko'rish</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            let itemsHTML = '';
+            data.cart_items.forEach(item => {
+                itemsHTML += `
+                    <div class="cart-item card">
+                        <div class="cart-item-img">
+                            <div class="placeholder"><i class="fas fa-utensils"></i></div>
+                        </div>
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <div class="details">${item.servings} kishilik · ${item.quantity} dona</div>
+                            <div class="item-price">${Number(item.subtotal).toLocaleString()} so'm</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button onclick="removeItem(${item.index})" class="remove-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                ${itemsHTML}
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Taomlar soni:</span>
+                        <span>${data.cart_items.length} ta</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Jami:</span>
+                        <span>${Number(data.total_price).toLocaleString()} so'm</span>
+                    </div>
+                    <form id="checkoutForm">
+                        <div class="form-group" style="margin-top: 15px;">
+                            <textarea id="checkoutNotes" rows="2" placeholder="Qo'shimcha eslatma (ixtiyoriy)" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-family: inherit; outline: none;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success checkout-btn">
+                            <i class="fas fa-paper-plane"></i> Buyurtma berish
+                        </button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('checkoutForm').addEventListener('submit', handleCheckout);
+        } catch (err) {
+            console.error('Cart load error:', err);
+        }
+    }
+
+    async function removeItem(index) {
+        try {
+            const res = await fetch(`/api/cart/${tableId}/remove/${index}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadCart();
+            } else {
+                showMessage(data.error || 'Olib tashlashda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Remove item error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    async function handleCheckout(e) {
+        e.preventDefault();
+        try {
+            const notes = document.getElementById('checkoutNotes').value;
+            const res = await fetch(`/api/cart/${tableId}/checkout/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notes })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                setTimeout(() => window.location.href = `/orders/${tableId}/`, 1500);
+            } else {
+                showMessage(data.error || 'Buyurtma yuborishda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Checkout error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCart();
+    });
+</script>
 {% endblock %}

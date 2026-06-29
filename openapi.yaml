@@ -1,0 +1,679 @@
+openapi: 3.0.3
+info:
+  title: Smart Cafe API Specification
+  description: API endpoints for customer and staff management systems in Smart Cafe project.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Local development server
+tags:
+  - name: Customer - General
+    description: General helper endpoints like ads, stats, and active waiter listings
+  - name: Customer - Tables
+    description: Endpoints for table selection, status tracking, and session setup
+  - name: Customer - Menu
+    description: Endpoints for browsing categories and detailed menu item cards
+  - name: Customer - Cart & Checkout
+    description: Endpoints for managing table-specific carts, orders, and checkout payments
+  - name: Customer - Services & Feedback
+    description: Endpoints for calling waiters and leaving table feedback reviews
+  - name: Staff - Operations & Dashboard
+    description: Endpoints for managing staff cockpit metrics, active calls, and order status updates
+  - name: Staff - Menu Management
+    description: Endpoints for categorizing menu items, adding new dishes, and uploading media images
+  - name: Staff - Table Management
+    description: Endpoints for adding physical tables and changing status flags manually
+paths:
+  # Customer - General
+  /home-stats/:
+    get:
+      tags:
+        - Customer - General
+      summary: Get general statistics for home page
+      responses:
+        '200':
+          description: Success
+
+  /advertisements/:
+    get:
+      tags:
+        - Customer - General
+      summary: Get list of active advertisements
+      responses:
+        '200':
+          description: Success
+
+  /waiters/:
+    get:
+      tags:
+        - Customer - General
+      summary: Get list of active waiters
+      responses:
+        '200':
+          description: Success
+
+  # Customer - Tables
+  /tables/:
+    get:
+      tags:
+        - Customer - Tables
+      summary: Get list of active tables
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/occupy/:
+    post:
+      tags:
+        - Customer - Tables
+      summary: Occupy a specific table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/free/:
+    post:
+      tags:
+        - Customer - Tables
+      summary: Change table status to cleaning
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/mark-free/:
+    post:
+      tags:
+        - Customer - Tables
+      summary: Mark table status back to free
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  # Customer - Menu
+  /categories/:
+    get:
+      tags:
+        - Customer - Menu
+      summary: Get active menu categories with item listings
+      responses:
+        '200':
+          description: Success
+
+  /menu-items/{item_id}/:
+    get:
+      tags:
+        - Customer - Menu
+      summary: Get detailed information of a specific menu item
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  # Customer - Cart & Checkout
+  /cart/{table_id}/:
+    get:
+      tags:
+        - Customer - Cart & Checkout
+      summary: View session-based cart items for a specific table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /cart/{table_id}/add/:
+    post:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Add an item to session-based cart
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - item_id
+              properties:
+                item_id:
+                  type: integer
+                servings:
+                  type: integer
+                  default: 1
+                quantity:
+                  type: integer
+                  default: 1
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Success
+
+  /cart/{table_id}/remove/{cart_index}/:
+    post:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Remove item from cart by list index
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cart_index
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /cart/{table_id}/checkout/:
+    post:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Place order from session-based cart
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Success
+
+  /tables/{table_id}/orders/:
+    get:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Get active session orders for a specific table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /orders/{order_id}/:
+    get:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Get specific order details
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /orders/{order_id}/complete/:
+    post:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Complete an order
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /orders/{order_id}/payment/process/:
+    post:
+      tags:
+        - Customer - Cart & Checkout
+      summary: Process simulated payment for an order
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                  enum: [cash, card, click, payme, uzum]
+                  default: cash
+      responses:
+        '200':
+          description: Success
+
+  # Customer - Services & Feedback
+  /waiter-calls/call/{table_id}/:
+    post:
+      tags:
+        - Customer - Services & Feedback
+      summary: Create a waiter call request
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  default: Mijoz chaqirdi
+      responses:
+        '200':
+          description: Success
+
+  /waiter-calls/latest/{table_id}/:
+    get:
+      tags:
+        - Customer - Services & Feedback
+      summary: Get the latest waiter call for a table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /feedback/{table_id}/:
+    post:
+      tags:
+        - Customer - Services & Feedback
+      summary: Submit customer feedback for a table
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+                menu_item_name:
+                  type: string
+                is_anonymous:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Success
+
+  # Staff - Operations & Dashboard
+  /staff/dashboard/:
+    get:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Get staff cockpit dashboard metrics (requires staff login)
+      responses:
+        '200':
+          description: Success
+
+  /staff/orders/:
+    get:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Get active/all orders for staff dashboard (requires staff login)
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+
+  /staff/orders/{order_id}/update-status/:
+    post:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Update order status (requires staff login)
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [pending, confirmed, preparing, ready, delivered, completed, cancelled]
+      responses:
+        '200':
+          description: Success
+
+  /staff/calls/:
+    get:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Get list of waiter calls for staff (requires staff login)
+      responses:
+        '200':
+          description: Success
+
+  /staff/calls/{call_id}/resolve/:
+    post:
+      tags:
+        - Staff - Operations & Dashboard
+      summary: Resolve/answer a waiter call (requires staff login)
+      parameters:
+        - name: call_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reply_message:
+                  type: string
+                  default: Xodim yo'lda
+      responses:
+        '200':
+          description: Success
+
+  # Staff - Menu Management
+  /staff/menu/:
+    get:
+      tags:
+        - Staff - Menu Management
+      summary: Get complete menu categorization for management (requires staff login)
+      responses:
+        '200':
+          description: Success
+
+  /staff/menu/item/add/:
+    post:
+      tags:
+        - Staff - Menu Management
+      summary: Add a new menu item (requires staff login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - category
+                - price
+              properties:
+                name:
+                  type: string
+                category:
+                  type: integer
+                  description: Category ID
+                price:
+                  type: number
+                description:
+                  type: string
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                  description: List of uploaded image URLs (max 10)
+                prep_time_minutes:
+                  type: integer
+                weight_grams:
+                  type: integer
+                calories:
+                  type: integer
+                serving_options:
+                  type: string
+                  description: Comma-separated portion options, e.g. "1, 1.5, 2"
+                vitamins:
+                  type: string
+                ingredients:
+                  type: string
+                is_available:
+                  type: boolean
+                is_popular:
+                  type: boolean
+      responses:
+        '200':
+          description: Success
+
+  /staff/menu/item/{item_id}/edit/:
+    post:
+      tags:
+        - Staff - Menu Management
+      summary: Edit an existing menu item (requires staff login)
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                category:
+                  type: integer
+                price:
+                  type: number
+                description:
+                  type: string
+                is_available:
+                  type: boolean
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                  description: List of uploaded image URLs (max 10)
+                prep_time_minutes:
+                  type: integer
+                weight_grams:
+                  type: integer
+                calories:
+                  type: integer
+                serving_options:
+                  type: string
+                vitamins:
+                  type: string
+                ingredients:
+                  type: string
+                is_popular:
+                  type: boolean
+      responses:
+        '200':
+          description: Success
+
+  /staff/menu/item/{item_id}/delete/:
+    post:
+      tags:
+        - Staff - Menu Management
+      summary: Delete a menu item completely from database (requires staff login)
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+
+  /staff/upload-image/:
+    post:
+      tags:
+        - Staff - Menu Management
+      summary: Upload a local image file to media directory (requires staff login)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The image file to upload
+      responses:
+        '200':
+          description: Success
+
+  # Staff - Table Management
+  /staff/tables/:
+    get:
+      tags:
+        - Staff - Table Management
+      summary: Get all tables for table management (requires staff login)
+      responses:
+        '200':
+          description: Success
+
+  /staff/tables/add/:
+    post:
+      tags:
+        - Staff - Table Management
+      summary: Add a new physical table (requires staff login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - number
+              properties:
+                number:
+                  type: integer
+      responses:
+        '200':
+          description: Success
+
+  /staff/tables/{table_id}/status/:
+    post:
+      tags:
+        - Staff - Table Management
+      summary: Update physical table status (requires staff login)
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [free, occupied, reserved, cleaning]
+        '200':
+          description: Success
+
+  /staff/tables/{table_id}/delete/:
+    post:
+      tags:
+        - Staff - Table Management
+      summary: Delete a physical table completely from database (requires staff login)
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success

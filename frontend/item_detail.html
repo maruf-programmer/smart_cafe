@@ -1,10 +1,212 @@
-{% extends 'core/base.html' %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script src="js/config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taom Tafsilotlari</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}Taom Tafsilotlari{% endblock %}
-{% block header_title %}<span id="header-title">Yuklanmoqda...</span>{% endblock %}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
 
-{% block extra_css %}
-<style>
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #24b893, #a36b65);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .logo i {
+            font-size: 1.8rem;
+            color: #9f1b83;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-actions a, .header-actions button {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .header-actions a:hover, .header-actions button:hover {
+            background: rgba(243, 156, 18, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-pending { background: #f39c12; color: #000; }
+        .badge-confirmed { background: #3498db; color: #fff; }
+        .badge-preparing { background: #e67e22; color: #fff; }
+        .badge-ready { background: #2ecc71; color: #fff; }
+        .badge-delivered { background: #1abc9c; color: #fff; }
+        .badge-completed { background: #27ae60; color: #fff; }
+        .badge-cancelled { background: #e74c3c; color: #fff; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .messages {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .message-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+        }
+
+        .message-error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+
+        .message-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header h1 { font-size: 1.1rem; }
+        }
+    </style>
+    <style>
     .item-hero {
         position: relative;
         height: 200px;
@@ -262,13 +464,50 @@
         .item-hero { height: 200px; }
     }
 </style>
-{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <h1>{% block header_title %}Cafe{% endblock %}</h1>
+        </div>
+        <div class="header-actions" id="nav-actions">
+            <a href="#" id="nav-menu-link" title="Menyu"><i class="fas fa-book-open"></i></a>
+            <a href="#" id="nav-cart-link" title="Savat"><i class="fas fa-shopping-cart"></i></a>
+            <a href="staff/dashboard.html" id="nav-admin-link" title="Admin Panel" style="display: none;"><i class="fas fa-user-shield"></i></a>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                let tId = urlParams.get('table_id') || localStorage.getItem('table_id');
+                if (tId) {
+                    localStorage.setItem('table_id', tId);
+                    document.getElementById('nav-menu-link').href = `menu.html?table_id=${tId}`;
+                    document.getElementById('nav-cart-link').href = `cart.html?table_id=${tId}`;
+                } else {
+                    document.getElementById('nav-menu-link').style.display = 'none';
+                    document.getElementById('nav-cart-link').style.display = 'none';
+                }
+                if (localStorage.getItem('is_staff') === 'true') {
+                    document.getElementById('nav-admin-link').style.display = 'inline-block';
+                }
+            });
+        </script>
+    </header>
 
-{% block content %}
-<div class="container">
+    <div class="messages" id="js-messages"></div>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container">
     <div class="item-hero">
         <i class="fas fa-utensils"></i>
-        <a href="{% url 'core:menu' table_id %}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <a href="menu.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
     </div>
 
     <div class="item-info" id="item-info" style="display: none;">
@@ -353,10 +592,34 @@
         </form>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
+    <footer class="footer">
+        &copy;  Cafe Tizimi. Barcha huquqlar himoyalangan.
+    </footer>
+
+    <script>
+        function showMessage(text, type='success') {
+            const container = document.getElementById('js-messages');
+            if(!container) return;
+            const msg = document.createElement('div');
+            msg.className = `message message-${type}`;
+            msg.innerText = text;
+            container.appendChild(msg);
+            setTimeout(() => {
+                msg.style.transition = 'opacity 0.5s';
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 500);
+            }, 4000);
+        }
+
+        setTimeout(() => {
+            document.querySelectorAll('.message').forEach(el => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+    </script>
+    <script>
     const tableId = "{{ table_id }}";
     const itemId = "{{ item_id }}";
 
@@ -383,7 +646,7 @@
 
     async function loadItemDetails() {
         try {
-            const res = await fetch(`/api/menu-items/${itemId}/`);
+            const res = await fetch(API_BASE_URL + `/api/menu-items/${itemId}/`, { credentials: 'include' });
             const item = await res.json();
             
             // Render image slider in hero container without destroying back-btn
@@ -596,4 +859,5 @@
         loadItemDetails();
     });
 </script>
-{% endblock %}
+</body>
+</html>

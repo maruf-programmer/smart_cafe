@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+    <script src="../js/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Boshqaruv Paneli{% endblock %}</title>
+    <title>Chaqiruvlar - Cafe Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -320,7 +321,109 @@
             .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
-    {% block extra_css %}{% endblock %}
+    <style>
+    .calls-page-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(rgba(11, 15, 25, 0.85), rgba(17, 24, 39, 0.95)), 
+                    url('https://images.unsplash.com/photo-1590579491470-363f577cfbc1?auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+        z-index: -1;
+    }
+    
+    .calls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .call-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .call-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .call-card.pending {
+        border-left: 6px solid var(--danger);
+        background: rgba(239, 68, 68, 0.03);
+    }
+    
+    .call-card.answered {
+        border-left: 6px solid var(--success);
+        background: rgba(16, 185, 129, 0.02);
+    }
+    
+    .call-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .call-header h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #fff;
+    }
+    
+    .call-body {
+        margin-bottom: 20px;
+    }
+    
+    .call-body .reason {
+        font-size: 0.95rem;
+        color: rgba(255,255,255,0.9);
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .call-body .time {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .call-actions {
+        margin-top: auto;
+    }
+    
+    .resolve-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .resolve-form input {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .resolve-form button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px;
+    }
+    
+    .resolved-info {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 10px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 10px;
+    }
+</style>
 </head>
 <body>
     <div class="sidebar">
@@ -329,29 +432,29 @@
             <h2>Cafe Admin</h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="{% url 'core:staff_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+            <a href="staff/dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{% url 'core:staff_orders' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_orders' %}active{% endif %}">
+            <a href="orders.html" class="nav-item">
                 <i class="fas fa-shopping-bag"></i>
                 <span>Buyurtmalar</span>
             </a>
-            <a href="{% url 'core:staff_calls' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_calls' %}active{% endif %}">
+            <a href="calls.html" class="nav-item">
                 <i class="fas fa-bell"></i>
                 <span>Chaqiruvlar</span>
             </a>
-            <a href="{% url 'core:staff_menu' %}" class="nav-item {% if 'menu' in request.path %}active{% endif %}">
+            <a href="../menu.html" class="nav-item">
                 <i class="fas fa-utensils"></i>
                 <span>Menyu</span>
             </a>
-            <a href="{% url 'core:staff_tables' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_tables' %}active{% endif %}">
+            <a href="tables.html" class="nav-item">
                 <i class="fas fa-chair"></i>
                 <span>Stollar</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="/admin/logout/" class="nav-item">
+            <a href=API_BASE_URL + "/admin/logout/" class="nav-item">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Chiqish</span>
             </a>
@@ -370,15 +473,19 @@
 
         <div class="top-bar">
             <div class="page-title">
-                <h1>{% block page_title %}Xush kelibsiz!{% endblock %}</h1>
-                <p>{% block page_subtitle %}Boshqaruv Cockpit Panel{% endblock %}</p>
+                <h1>Ofitsiant chaqiruvlari</h1>
+                <p>Boshqaruv Panel</p>
             </div>
             <div class="top-bar-actions">
-                {% block top_actions %}{% endblock %}
+                
             </div>
         </div>
 
-        {% block content %}{% endblock %}
+        <div class="calls-page-bg"></div>
+
+<div class="calls-grid" id="callsContainer">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Yuklanmoqda...</div>
+</div>
     </main>
 
     <script>
@@ -404,6 +511,117 @@
             });
         }, 3000);
     </script>
-    {% block extra_js %}{% endblock %}
+    <script>
+    async function loadCalls() {
+        try {
+            const res = await fetch(API_BASE_URL + '/api/staff/calls/', { credentials: 'include' });
+            if (!res.ok) return;
+            const calls = await res.json();
+            
+            const container = document.getElementById('callsContainer');
+            container.innerHTML = '';
+            
+            if (calls.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Hozircha chaqiruvlar yo'q</div>`;
+                return;
+            }
+            
+            calls.forEach(call => {
+                const time = new Date(call.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+                const elapsed = Math.floor((new Date() - new Date(call.created_at)) / 60000);
+                
+                let badgeHTML = '';
+                let actionHTML = '';
+                
+                if (call.is_answered) {
+                    const answeredTime = new Date(call.answered_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+                    badgeHTML = `<span class="badge badge-success">Javob berildi</span>`;
+                    actionHTML = `
+                        <div class="resolved-info">
+                            <i class="fas fa-check-circle" style="color: var(--success); margin-right: 5px;"></i>
+                            ${answeredTime} da yopilgan (${call.reply_message})
+                        </div>
+                    `;
+                } else {
+                    badgeHTML = `<span class="badge badge-danger">Kutilmoqda</span>`;
+                    actionHTML = `
+                        <div class="resolve-form">
+                            <input type="text" id="reply-${call.id}" placeholder="Javob xabari..." class="btn btn-outline" value="Xodim yo'lda">
+                            <button onclick="resolveCall(${call.id})" class="btn btn-primary">Javob berish</button>
+                        </div>
+                    `;
+                }
+                
+                const cardClass = call.is_answered ? 'answered' : 'pending';
+                
+                container.innerHTML += `
+                    <div class="call-card ${cardClass}">
+                        <div>
+                            <div class="call-header">
+                                <h3>Stol #${call.table_detail.number}</h3>
+                                ${badgeHTML}
+                            </div>
+                            <div class="call-body">
+                                <div class="reason"><i class="fas fa-comment-dots" style="color: var(--primary); margin-right: 5px;"></i> ${call.reason || "Chaqiruv"}</div>
+                                <div class="time"><i class="fas fa-clock" style="margin-right: 5px;"></i> ${time} (${elapsed} daqiqa oldin)</div>
+                            </div>
+                        </div>
+                        <div class="call-actions">
+                            ${actionHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Calls load error:', err);
+        }
+    }
+
+    async function resolveCall(callId) {
+        const replyInput = document.getElementById(`reply-${callId}`);
+        const reply_message = replyInput ? replyInput.value : 'Xodim yo\'lda';
+        
+        try {
+            const res = await fetch(`/api/staff/calls/${callId}/resolve/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reply_message })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadCalls();
+            } else {
+                showMessage(data.error || 'Xatolik yuz berdi', 'error');
+            }
+        } catch (err) {
+            console.error('Resolve call error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCalls();
+        setInterval(loadCalls, 10000);
+    });
+</script>
 </body>
 </html>

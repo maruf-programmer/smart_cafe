@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Ofitsiant chaqirish - Stol #{{ table.number }}{% endblock %}
+{% block title %}Ofitsiant chaqirish{% endblock %}
 {% block header_title %}Ofitsiant chaqirish{% endblock %}
 
 {% block extra_css %}
@@ -178,6 +178,7 @@
         padding: 40px 20px;
         text-align: center;
         margin-bottom: 20px;
+        display: none;
     }
 
     .success-message i {
@@ -229,108 +230,203 @@
 
 {% block content %}
 <div class="call-container">
-    {% if success %}
-    <div class="success-message">
+    <div class="success-message" id="successBlock">
         <i class="fas fa-bell"></i>
         <h2>Ofitsiant chaqirildi!</h2>
         <p style="color: rgba(255,255,255,0.7); margin: 10px 0;">Xodimlarga SMS yuborildi. Tez orada yoningizga kelishadi.</p>
 
-        {% if waiters %}
         <div class="phone-numbers" style="text-align: left; margin-top: 20px;">
             <h3><i class="fas fa-phone-alt"></i> Shoshilinch aloqa</h3>
-            {% for waiter in waiters %}
-            <div class="phone-item">
-                <div>
-                    <div class="name">{{ waiter.name }}</div>
-                    <div class="role">{{ waiter.get_role_display }}</div>
+            <div id="waiterPhonesSuccess">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div id="callBlock">
+        <div class="reply-box" id="replyBox" style="display: none;">
+            <div class="reply-icon"><i class="fas fa-reply"></i></div>
+            <h3>Ofitsiant javobi:</h3>
+            <p id="replyMessage">...</p>
+        </div>
+
+        <div class="call-header">
+            <div class="call-bell-3d">
+                <div class="bell" onclick="quickCall()"><i class="fas fa-bell"></i></div>
+            </div>
+            <h2>Ofitsiantni chaqirish</h2>
+            <p>Tugmani bosing yoki sababni tanlang</p>
+        </div>
+
+        <form id="callForm">
+            <div class="call-options">
+                <div class="call-option card" onclick="selectReason('Hisob olish', this)">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h4>Hisob olish</h4>
+                    <p>Hisobni so'rash</p>
                 </div>
-                <a href="tel:{{ waiter.phone }}" class="phone">{{ waiter.phone }}</a>
+                <div class="call-option card" onclick="selectReason('Qo\'shimcha buyurtma', this)">
+                    <i class="fas fa-plus-circle"></i>
+                    <h4>Qo'shimcha</h4>
+                    <p>Yana taom buyurtma</p>
+                </div>
+                <div class="call-option card" onclick="selectReason('Muammo bor', this)">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Muammo</h4>
+                    <p>Biror muammo bor</p>
+                </div>
+                <div class="call-option card" onclick="selectReason('Boshqa', this)">
+                    <i class="fas fa-comment"></i>
+                    <h4>Boshqa</h4>
+                    <p>Boshqa sabab</p>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-    {% else %}
 
-    {% if reply_message %}
-    <div class="reply-box">
-        <div class="reply-icon"><i class="fas fa-reply"></i></div>
-        <h3>Ofitsiant javobi:</h3>
-        <p>{{ reply_message }}</p>
-    </div>
-    {% endif %}
+            <textarea name="reason" class="note-textarea" rows="3" placeholder="Qo'shimcha izoh (ixtiyoriy)..." id="reasonInput"></textarea>
 
-    <div class="call-header">
-        <div class="call-bell-3d">
-            <div class="bell"><i class="fas fa-bell"></i></div>
-        </div>
-        <h2>Ofitsiantni chaqirish</h2>
-        <p>Tugmani bosing yoki sababni tanlang</p>
-    </div>
+            <button type="submit" class="btn btn-primary submit-btn">
+                <i class="fas fa-bell"></i> Ofitsiantni chaqirish
+            </button>
+        </form>
 
-    <form method="post" id="callForm">
-        {% csrf_token %}
-
-        <div class="call-options">
-            <div class="call-option card" onclick="selectReason('Hisob olish', this)">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <h4>Hisob olish</h4>
-                <p>Hisobni so'rash</p>
-            </div>
-            <div class="call-option card" onclick="selectReason('Qo\'shimcha buyurtma', this)">
-                <i class="fas fa-plus-circle"></i>
-                <h4>Qo'shimcha</h4>
-                <p>Yana taom buyurtma</p>
-            </div>
-            <div class="call-option card" onclick="selectReason('Muammo bor', this)">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h4>Muammo</h4>
-                <p>Biror muammo bor</p>
-            </div>
-            <div class="call-option card" onclick="selectReason('Boshqa', this)">
-                <i class="fas fa-comment"></i>
-                <h4>Boshqa</h4>
-                <p>Boshqa sabab</p>
+        <div class="phone-numbers" id="waitersPhoneBlock" style="display: none;">
+            <h3><i class="fas fa-phone-alt"></i> Kutishni istamasangiz, shu raqamlarga qo'ng'iroq qiling:</h3>
+            <div id="waiterPhones">
+                <!-- Waiters list -->
             </div>
         </div>
 
-        <textarea name="reason" class="note-textarea" rows="3" placeholder="Qo'shimcha izoh (ixtiyoriy)..." id="reasonInput"></textarea>
-
-        <button type="submit" class="btn btn-primary submit-btn">
-            <i class="fas fa-bell"></i> Ofitsiantni chaqirish
-        </button>
-    </form>
-
-    {% if waiters %}
-    <div class="phone-numbers">
-        <h3><i class="fas fa-phone-alt"></i> Kutishni istamasangiz, shu raqamlarga qo'ng'iroq qiling:</h3>
-        {% for waiter in waiters %}
-        <div class="phone-item">
-            <div>
-                <div class="name">{{ waiter.name }}</div>
-                <div class="role">{{ waiter.get_role_display }}</div>
-            </div>
-            <a href="tel:{{ waiter.phone }}" class="phone">
-                <i class="fas fa-phone"></i> {{ waiter.phone }}
-            </a>
-        </div>
-        {% endfor %}
+        <p class="info-text">
+            <i class="fas fa-info-circle"></i> Sizning joylashgan joyingiz: Stol #<span id="lblTableNum">...</span>
+        </p>
     </div>
-    {% endif %}
-
-    <p class="info-text">
-        <i class="fas fa-info-circle"></i> Sizning joylashgan joyingiz: Stol #{{ table.number }}
-    </p>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    const tableId = "{{ table_id }}";
+
     function selectReason(reason, element) {
         document.getElementById('reasonInput').value = reason;
         document.querySelectorAll('.call-option').forEach(el => el.classList.remove('active'));
         if (element) element.classList.add('active');
     }
+
+    async function initPage() {
+        try {
+            // Load table info
+            const tRes = await fetch('/api/tables/');
+            const tables = await tRes.json();
+            const table = tables.find(t => t.id == tableId);
+            if (table) {
+                document.getElementById('lblTableNum').innerText = table.number;
+            }
+
+            // Load active waiters
+            const wRes = await fetch('/api/waiters/');
+            const waiters = await wRes.json();
+            if (waiters && waiters.length > 0) {
+                const list1 = document.getElementById('waiterPhones');
+                const list2 = document.getElementById('waiterPhonesSuccess');
+                list1.innerHTML = '';
+                list2.innerHTML = '';
+                
+                waiters.forEach(w => {
+                    const rowHTML = `
+                        <div class="phone-item">
+                            <div>
+                                <div class="name">${w.name}</div>
+                                <div class="role">${w.role_display}</div>
+                            </div>
+                            <a href="tel:${w.phone}" class="phone"><i class="fas fa-phone"></i> ${w.phone}</a>
+                        </div>
+                    `;
+                    list1.innerHTML += rowHTML;
+                    list2.innerHTML += rowHTML;
+                });
+                document.getElementById('waitersPhoneBlock').style.display = 'block';
+            }
+
+            // Check for waiter replies
+            checkReplies();
+            setInterval(checkReplies, 7000);
+        } catch (err) {
+            console.error('Init error:', err);
+        }
+    }
+
+    async function checkReplies() {
+        try {
+            const res = await fetch(`/api/waiter-calls/latest/${tableId}/`);
+            if (res.ok) {
+                const call = await res.json();
+                if (call.reply_message && !call.is_answered) {
+                    // There is active reply
+                }
+                if (call.reply_message) {
+                    document.getElementById('replyBox').style.display = 'block';
+                    document.getElementById('replyMessage').innerText = call.reply_message;
+                } else {
+                    document.getElementById('replyBox').style.display = 'none';
+                }
+            }
+        } catch (err) {
+            console.error('Check replies error:', err);
+        }
+    }
+
+    async function quickCall() {
+        await triggerCall('Mijoz chaqirdi (Tugma bosildi)');
+    }
+
+    document.getElementById('callForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const reason = document.getElementById('reasonInput').value || 'Mijoz chaqirdi';
+        await triggerCall(reason);
+    });
+
+    async function triggerCall(reason) {
+        try {
+            const res = await fetch(`/api/waiter-calls/call/${tableId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reason })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage('Chaqiruv yuborildi!', 'success');
+                document.getElementById('callBlock').style.display = 'none';
+                document.getElementById('successBlock').style.display = 'block';
+            } else {
+                showMessage(data.error || 'Xatolik yuz berdi', 'error');
+            }
+        } catch (err) {
+            console.error('Call submit error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initPage();
+    });
 </script>
 {% endblock %}

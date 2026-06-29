@@ -107,7 +107,7 @@
         transition: 0.2s;
     }
 
-    .btn-resolve { background: var(--primary); color: white; border: none; }
+    .btn-resolve { background: var(--primary); color: white; border: none; cursor: pointer; }
     .btn-resolve:hover { background: #4338ca; }
 </style>
 {% endblock %}
@@ -117,8 +117,8 @@
     <div class="stat-card primary">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <span class="label">Kutilmoqda</span>
-                <span class="value">{{ pending_orders }}</span>
+                <span class="label">Kutilmoqda (Faol)</span>
+                <span class="value" id="lblPendingOrders">0</span>
             </div>
             <i class="fas fa-clock" style="font-size: 1.5rem; color: var(--primary); opacity: 0.5;"></i>
         </div>
@@ -127,7 +127,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <span class="label">Band Stollar</span>
-                <span class="value">{{ occupied_tables }} / {{ total_tables }}</span>
+                <span class="value" id="lblOccupiedTables">0 / 0</span>
             </div>
             <i class="fas fa-chair" style="font-size: 1.5rem; color: var(--success); opacity: 0.5;"></i>
         </div>
@@ -136,7 +136,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <span class="label">Faol Chaqiruvlar</span>
-                <span class="value">{{ waiter_calls_count }}</span>
+                <span class="value" id="lblActiveCalls">0</span>
             </div>
             <i class="fas fa-bell" style="font-size: 1.5rem; color: var(--danger); opacity: 0.5;"></i>
         </div>
@@ -145,7 +145,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <span class="label">Bugungi Yakunlangan</span>
-                <span class="value">{{ today_completed }}</span>
+                <span class="value" id="lblTodayCompleted">0</span>
             </div>
             <i class="fas fa-check-circle" style="font-size: 1.5rem; color: var(--warning); opacity: 0.5;"></i>
         </div>
@@ -169,17 +169,8 @@
                         <th>Holat</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for order in pending_orders_list %}
-                    <tr>
-                        <td style="font-weight: 600;">#{{ order.id }}</td>
-                        <td><span class="badge badge-success">Stol {{ order.table.number }}</span></td>
-                        <td style="color: var(--primary); font-weight: 700;">{{ order.total_price }} so'm</td>
-                        <td><span class="badge badge-pending">{{ order.get_status_display }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Faol buyurtmalar yo'q</td></tr>
-                    {% endfor %}
+                <tbody id="tblRecentOrders">
+                    <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Yuklanmoqda...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -190,21 +181,8 @@
         <div class="card-header">
             <h3>Mijozlar Chaqiruvi</h3>
         </div>
-        <div style="padding: 24px;">
-            {% for call in waiter_calls_list %}
-            <div style="background: #fff5f5; border: 1px solid #feb2b2; padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h4 style="margin: 0; color: #c53030;">Stol #{{ call.table.number }}</h4>
-                    <small style="color: #9b2c2c;">{{ call.created_at|timesince }} oldin</small>
-                </div>
-                <form action="{% url 'core:resolve_call' call.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-action btn-resolve">Javob berish</button>
-                </form>
-            </div>
-            {% empty %}
-            <div style="text-align: center; color: var(--secondary);">Hozircha chaqiruvlar yo'q</div>
-            {% endfor %}
+        <div style="padding: 24px;" id="callsList">
+            <div style="text-align: center; color: var(--secondary);">Yuklanmoqda...</div>
         </div>
     </div>
 </div>
@@ -223,21 +201,135 @@
                     <th>Harakat</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for table in active_tables %}
-                <tr>
-                    <td style="font-weight: 600;">Stol {{ table.number }}</td>
-                    <td><span class="badge badge-pending">Band</span></td>
-                    <td>{{ table.current_session_start|date:"H:i" }} ({{ table.current_session_start|timesince }} oldin)</td>
-                    <td>
-                        <a href="{% url 'core:complete_session' table.id %}" class="btn-action" style="background: #f1f5f9; color: #475569;">Yakunlash</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Hozircha hamma stollar bo'sh</td></tr>
-                {% endfor %}
+            <tbody id="tblActiveTables">
+                <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Yuklanmoqda...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadDashboard() {
+        try {
+            const res = await fetch('/api/staff/dashboard/');
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            document.getElementById('lblPendingOrders').innerText = data.pending_orders;
+            document.getElementById('lblOccupiedTables').innerText = `${data.occupied_tables} / ${data.total_tables}`;
+            document.getElementById('lblActiveCalls').innerText = data.waiter_calls_count;
+            document.getElementById('lblTodayCompleted').innerText = data.today_completed;
+            
+            // Render recent orders
+            const tblOrders = document.getElementById('tblRecentOrders');
+            tblOrders.innerHTML = '';
+            if (data.pending_orders_list.length === 0) {
+                tblOrders.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Faol buyurtmalar yo'q</td></tr>`;
+            } else {
+                data.pending_orders_list.forEach(o => {
+                    tblOrders.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 600;">#${o.id}</td>
+                            <td><span class="badge badge-success">Stol ${o.table_detail.number}</span></td>
+                            <td style="color: var(--primary); font-weight: 700;">${Number(o.total_price).toLocaleString()} so'm</td>
+                            <td><span class="badge badge-pending">${o.status_display}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            // Render active calls
+            const callsDiv = document.getElementById('callsList');
+            callsDiv.innerHTML = '';
+            if (data.waiter_calls_list.length === 0) {
+                callsDiv.innerHTML = `<div style="text-align: center; color: var(--secondary);">Hozircha chaqiruvlar yo'q</div>`;
+            } else {
+                data.waiter_calls_list.forEach(c => {
+                    const elapsed = Math.floor((new Date() - new Date(c.created_at)) / 60000);
+                    callsDiv.innerHTML += `
+                        <div style="background: #fff5f5; border: 1px solid #feb2b2; padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; color: #c53030;">Stol #${c.table_detail.number}</h4>
+                                <small style="color: #9b2c2c;">${elapsed} daqiqa oldin (${c.reason})</small>
+                            </div>
+                            <button onclick="resolveCall(${c.id})" class="btn-action btn-resolve">Javob berish</button>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Render active sessions
+            const tblTables = document.getElementById('tblActiveTables');
+            tblTables.innerHTML = '';
+            if (data.active_tables.length === 0) {
+                tblTables.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--secondary);">Hozircha hamma stollar bo'sh</td></tr>`;
+            } else {
+                data.active_tables.forEach(t => {
+                    const start = t.current_session_start ? new Date(t.current_session_start).toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'}) : '...';
+                    tblTables.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 600;">Stol ${t.number}</td>
+                            <td><span class="badge badge-pending">Band</span></td>
+                            <td>${start}</td>
+                            <td>
+                                <a href="/complete/${t.id}/" class="btn-action" style="background: #f1f5f9; color: #475569;">Yakunlash</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        } catch (err) {
+            console.error('Dashboard load error:', err);
+        }
+    }
+
+    async function resolveCall(callId) {
+        const msg = prompt("Ofitsiant javob xabari (ixtiyoriy):", "Xodim yo'lda");
+        if (msg === null) return; // cancel
+        
+        try {
+            const res = await fetch(`/api/staff/calls/${callId}/resolve/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ reply_message: msg })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadDashboard();
+            } else {
+                showMessage(data.error || 'Xatolik yuz berdi', 'error');
+            }
+        } catch (err) {
+            console.error('Resolve call error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDashboard();
+        // Auto refresh dashboard metrics every 10 seconds
+        setInterval(loadDashboard, 10000);
+    });
+</script>
 {% endblock %}

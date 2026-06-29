@@ -3,6 +3,8 @@
 db.sqlite3
 .env
 venv/
+.venv/
+.aider*
 .vscode/
 static/
 media/

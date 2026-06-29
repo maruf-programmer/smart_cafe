@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+    <script src="../js/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Boshqaruv Paneli{% endblock %}</title>
+    <title>Stollar Boshqaruvi - Smart Cafe Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -320,7 +321,149 @@
             .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
-    {% block extra_css %}{% endblock %}
+    <style>
+    :root {
+        --deep-green: #064e3b;
+        --glass: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    body {
+        background: linear-gradient(rgba(6, 78, 59, 0.9), rgba(6, 78, 59, 0.95)), 
+                    url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+    }
+
+    .main-content {
+        background: transparent !important;
+    }
+
+    .page-title h1, .page-title p {
+        color: #fff !important;
+    }
+
+    .glass-card {
+        background: var(--glass);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin-bottom: 30px;
+    }
+
+    .add-table-form {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: #fff;
+        outline: none;
+    }
+
+    .btn-add {
+        background: #10b981;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-add:hover {
+        background: #059669;
+        transform: scale(1.05);
+    }
+
+    .table-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+    }
+
+    .table-card {
+        background: var(--glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 25px;
+        text-align: center;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .table-card:hover {
+        transform: translateY(-10px);
+        border-color: #10b981;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+    }
+
+    .status-icon {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.1);
+        margin: 0 auto 15px;
+        font-size: 1.5rem;
+    }
+
+    .status-free { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+    .status-occupied { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+    .status-reserved { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .status-cleaning { color: #55efc4; text-shadow: 0 0 10px rgba(85, 239, 196, 0.5); }
+
+    .status-select {
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        color: #fff;
+        border: 1px solid var(--glass-border);
+        padding: 10px;
+        border-radius: 10px;
+        margin: 15px 0;
+        cursor: pointer;
+    }
+
+    .qr-link {
+        display: block;
+        padding: 10px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: 0.3s;
+    }
+
+    .qr-link:hover {
+        background: #fff;
+        color: var(--deep-green);
+    }
+</style>
 </head>
 <body>
     <div class="sidebar">
@@ -329,29 +472,29 @@
             <h2>Cafe Admin</h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="{% url 'core:staff_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+            <a href="staff/dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{% url 'core:staff_orders' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_orders' %}active{% endif %}">
+            <a href="orders.html" class="nav-item">
                 <i class="fas fa-shopping-bag"></i>
                 <span>Buyurtmalar</span>
             </a>
-            <a href="{% url 'core:staff_calls' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_calls' %}active{% endif %}">
+            <a href="calls.html" class="nav-item">
                 <i class="fas fa-bell"></i>
                 <span>Chaqiruvlar</span>
             </a>
-            <a href="{% url 'core:staff_menu' %}" class="nav-item {% if 'menu' in request.path %}active{% endif %}">
+            <a href="../menu.html" class="nav-item">
                 <i class="fas fa-utensils"></i>
                 <span>Menyu</span>
             </a>
-            <a href="{% url 'core:staff_tables' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_tables' %}active{% endif %}">
+            <a href="tables.html" class="nav-item">
                 <i class="fas fa-chair"></i>
                 <span>Stollar</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="/admin/logout/" class="nav-item">
+            <a href=API_BASE_URL + "/admin/logout/" class="nav-item">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Chiqish</span>
             </a>
@@ -370,15 +513,30 @@
 
         <div class="top-bar">
             <div class="page-title">
-                <h1>{% block page_title %}Xush kelibsiz!{% endblock %}</h1>
-                <p>{% block page_subtitle %}Boshqaruv Cockpit Panel{% endblock %}</p>
+                <h1>Stollar Boshqaruvi</h1>
+                <p>Boshqaruv Panel</p>
             </div>
             <div class="top-bar-actions">
-                {% block top_actions %}{% endblock %}
+                
             </div>
         </div>
 
-        {% block content %}{% endblock %}
+        <div class="glass-card">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-tools"></i> Yangi Stol O'rnatish</h3>
+    <form id="addTableForm" class="add-table-form">
+        <div class="form-group">
+            <label>Stol Raqami</label>
+            <input type="number" id="tableNumInput" placeholder="Masalan: 12" required class="form-control">
+        </div>
+        <button type="submit" class="btn-add">
+            <i class="fas fa-plus"></i> Stol Qo'shish
+        </button>
+    </form>
+</div>
+
+<div class="table-grid" id="tablesGrid">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Yuklanmoqda...</div>
+</div>
     </main>
 
     <script>
@@ -404,6 +562,151 @@
             });
         }, 3000);
     </script>
-    {% block extra_js %}{% endblock %}
+    <script>
+    async function loadTables() {
+        try {
+            const res = await fetch(API_BASE_URL + '/api/staff/tables/', { credentials: 'include' });
+            if (!res.ok) return;
+            const tables = await res.json();
+            
+            const grid = document.getElementById('tablesGrid');
+            grid.innerHTML = '';
+            
+            if (tables.length === 0) {
+                grid.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Stollar topilmadi</div>`;
+                return;
+            }
+            
+            tables.forEach(table => {
+                let statusIconClass = 'status-reserved';
+                if (table.status === 'free') statusIconClass = 'status-free';
+                else if (table.status === 'occupied') statusIconClass = 'status-occupied';
+                else if (table.status === 'cleaning') statusIconClass = 'status-cleaning';
+                
+                grid.innerHTML += `
+                    <div class="table-card">
+                        <div class="status-icon">
+                            <i class="fas fa-chair ${statusIconClass}"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 5px;">Stol #${table.number}</h3>
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6);">
+                            ${table.status_display}
+                        </span>
+                        
+                        <select onchange="updateTableStatus(${table.id}, this.value)" class="status-select">
+                            <option value="free" ${table.status === 'free' ? 'selected' : ''}>Bo'sh (Free)</option>
+                            <option value="occupied" ${table.status === 'occupied' ? 'selected' : ''}>Band (Occupied)</option>
+                            <option value="reserved" ${table.status === 'reserved' ? 'selected' : ''}>Bron (Reserved)</option>
+                            <option value="cleaning" ${table.status === 'cleaning' ? 'selected' : ''}>Tozalash (Cleaning)</option>
+                        </select>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <a href="/menu/${table.id}/" target="_blank" class="qr-link" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                <i class="fas fa-qrcode"></i> QR Menyu
+                            </a>
+                            <button onclick="deleteTable(${table.id}, ${table.number})" class="btn btn-danger" style="flex: 1; padding: 10px; font-size: 0.85rem; background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; color: #fff; cursor: pointer; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);" title="Stolni o'chirish">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Tables load error:', err);
+        }
+    }
+
+    async function updateTableStatus(tableId, status) {
+        try {
+            const res = await fetch(`/api/staff/tables/${tableId}/status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadTables();
+            } else {
+                showMessage(data.error || 'Yangilashda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Update status error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    async function deleteTable(tableId, tableNumber) {
+        if (!confirm(`Haqiqatan ham #${tableNumber}-stolni butunlay o'chirmoqchimisiz?\n(Ushbu stoldagi barcha faol buyurtmalar va sessiyalar o'chib ketadi!)`)) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/staff/tables/${tableId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadTables();
+            } else {
+                showMessage(data.error || "O'chirishda xatolik yuz berdi", 'error');
+            }
+        } catch (err) {
+            console.error('Delete table error:', err);
+            showMessage("Tizim bilan bog'lanishda xatolik", 'error');
+        }
+    }
+
+    document.getElementById('addTableForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const number = parseInt(document.getElementById('tableNumInput').value);
+        try {
+            const res = await fetch('/api/staff/tables/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ number })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                document.getElementById('tableNumInput').value = '';
+                loadTables();
+            } else {
+                showMessage(data.error || 'Qo\'shishda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Add table error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTables();
+    });
+</script>
 </body>
 </html>

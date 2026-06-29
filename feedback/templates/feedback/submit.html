@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Fikr bildirish - Stol #{{ table.number }}{% endblock %}
+{% block title %}Fikr bildirish{% endblock %}
 {% block header_title %}Fikr bildirish{% endblock %}
 
 {% block extra_css %}
@@ -111,6 +111,7 @@
     .success-container {
         text-align: center;
         padding: 60px 20px;
+        display: none;
     }
 
     .success-container i {
@@ -126,24 +127,21 @@
 
 {% block content %}
 <div class="container">
-    {% if success %}
-    <div class="success-container">
+    <div class="success-container" id="successContainer">
         <i class="fas fa-check-circle"></i>
         <h2>Rahmat!</h2>
         <p>Fikringiz uchun tashakkur. Sizning fikringiz biz uchun muhim!</p>
         <a href="{% url 'core:my_orders' table_id %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Buyurtmalarga qaytish</a>
     </div>
-    {% else %}
-    <div class="feedback-container">
+
+    <div class="feedback-container" id="feedbackFormContainer">
         {% if order_id > 0 %}
         <div class="order-info">
             <strong>Buyurtma #{{ order_id }}</strong> haqida fikr bildirmoqdasiz
         </div>
         {% endif %}
 
-        <form method="post" class="feedback-form">
-            {% csrf_token %}
-
+        <form id="feedbackForm" class="feedback-form">
             <div class="rating-section">
                 <h3>Baholang</h3>
                 <div class="stars" id="starContainer">
@@ -154,24 +152,24 @@
                     <span class="star" data-value="5"><i class="fas fa-star"></i></span>
                 </div>
                 <div class="rating-text" id="ratingText">Baho tanlang</div>
-                <input type="hidden" name="rating" id="ratingInput" value="" required>
+                <input type="hidden" id="ratingInput" required>
             </div>
 
             {% if order_id > 0 %}
             <div class="form-group">
                 <label>Taom nomi (ixtiyoriy)</label>
-                <input type="text" name="menu_item_name" placeholder="Qaysi taom haqida fikr bildirmoqchisiz?">
+                <input type="text" id="menuItemName" placeholder="Qaysi taom haqida fikr bildirmoqchisiz?">
             </div>
             {% endif %}
 
             <div class="form-group">
                 <label>Fikringiz</label>
-                <textarea name="comment" placeholder="Fikr va takliflaringizni yozing..."></textarea>
+                <textarea id="comment" placeholder="Fikr va takliflaringizni yozing..."></textarea>
             </div>
 
             <div class="form-group">
                 <div class="checkbox-group">
-                    <input type="checkbox" name="is_anonymous" id="anonymous" value="true">
+                    <input type="checkbox" id="anonymous" value="true">
                     <label for="anonymous" style="margin: 0;">Anonim yuborish</label>
                 </div>
             </div>
@@ -181,12 +179,14 @@
             </button>
         </form>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    const tableId = "{{ table_id }}";
+    const orderId = "{{ order_id }}";
+    
     const stars = document.querySelectorAll('.star');
     const ratingText = document.getElementById('ratingText');
     const ratingInput = document.getElementById('ratingInput');
@@ -227,5 +227,58 @@
         });
         ratingText.textContent = currentValue ? ratingLabels[currentValue] : 'Baho tanlang';
     });
+
+    document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const rating = ratingInput.value;
+        if (!rating) {
+            showMessage('Iltimos baho tanlang', 'error');
+            return;
+        }
+        
+        const body = {
+            rating: parseInt(rating),
+            comment: document.getElementById('comment').value,
+            menu_item_name: document.getElementById('menuItemName') ? document.getElementById('menuItemName').value : '',
+            is_anonymous: document.getElementById('anonymous').checked
+        };
+        
+        try {
+            const res = await fetch(`/api/feedback/${tableId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('feedbackFormContainer').style.display = 'none';
+                document.getElementById('successContainer').style.display = 'block';
+            } else {
+                showMessage(data.error || 'Fikr yuborishda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Feedback submit error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 </script>
 {% endblock %}

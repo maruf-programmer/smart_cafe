@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+    <script src="../js/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Boshqaruv Paneli{% endblock %}</title>
+    <title>Menyu - Cafe Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -320,7 +321,116 @@
             .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
-    {% block extra_css %}{% endblock %}
+    <style>
+    .menu-page-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(rgba(11, 15, 25, 0.85), rgba(17, 24, 39, 0.95)), 
+                    url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+        z-index: -1;
+    }
+    
+    .card-category {
+        margin-bottom: 40px;
+    }
+    
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(255,255,255,0.05);
+    }
+    
+    .category-header h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ffffff, #a5b4fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+    
+    .menu-item-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s;
+    }
+    
+    .menu-item-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .item-image {
+        height: 160px;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: rgba(255,255,255,0.1);
+        position: relative;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-availability {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .item-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .item-body h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #fff;
+    }
+    
+    .item-body .price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #f39c12;
+        margin-bottom: 15px;
+    }
+    
+    .item-actions {
+        margin-top: auto;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .item-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+</style>
 </head>
 <body>
     <div class="sidebar">
@@ -329,29 +439,29 @@
             <h2>Cafe Admin</h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="{% url 'core:staff_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+            <a href="staff/dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{% url 'core:staff_orders' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_orders' %}active{% endif %}">
+            <a href="orders.html" class="nav-item">
                 <i class="fas fa-shopping-bag"></i>
                 <span>Buyurtmalar</span>
             </a>
-            <a href="{% url 'core:staff_calls' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_calls' %}active{% endif %}">
+            <a href="calls.html" class="nav-item">
                 <i class="fas fa-bell"></i>
                 <span>Chaqiruvlar</span>
             </a>
-            <a href="{% url 'core:staff_menu' %}" class="nav-item {% if 'menu' in request.path %}active{% endif %}">
+            <a href="../menu.html" class="nav-item">
                 <i class="fas fa-utensils"></i>
                 <span>Menyu</span>
             </a>
-            <a href="{% url 'core:staff_tables' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_tables' %}active{% endif %}">
+            <a href="tables.html" class="nav-item">
                 <i class="fas fa-chair"></i>
                 <span>Stollar</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="/admin/logout/" class="nav-item">
+            <a href=API_BASE_URL + "/admin/logout/" class="nav-item">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Chiqish</span>
             </a>
@@ -370,15 +480,19 @@
 
         <div class="top-bar">
             <div class="page-title">
-                <h1>{% block page_title %}Xush kelibsiz!{% endblock %}</h1>
-                <p>{% block page_subtitle %}Boshqaruv Cockpit Panel{% endblock %}</p>
+                <h1>Menyu boshqaruvi</h1>
+                <p>Boshqaruv Panel</p>
             </div>
             <div class="top-bar-actions">
-                {% block top_actions %}{% endblock %}
+                <a href="{% url 'core:menu_item_add' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Yangi taom</a>
             </div>
         </div>
 
-        {% block content %}{% endblock %}
+        <div class="menu-page-bg"></div>
+
+<div id="categoriesContainer">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>
+</div>
     </main>
 
     <script>
@@ -404,6 +518,113 @@
             });
         }, 3000);
     </script>
-    {% block extra_js %}{% endblock %}
+    <script>
+    async function loadMenu() {
+        try {
+            const res = await fetch(API_BASE_URL + '/api/staff/menu/', { credentials: 'include' });
+            if (!res.ok) return;
+            const categories = await res.json();
+            
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = '';
+            
+            if (categories.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Hozircha menyular mavjud emas</div>`;
+                return;
+            }
+            
+            categories.forEach(category => {
+                let itemsHTML = '';
+                if (category.items.length === 0) {
+                    itemsHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted); grid-column: 1/-1;">Bu kategoriyada taomlar yo'q</div>`;
+                } else {
+                    category.items.forEach(item => {
+                        const statusBadge = item.is_available 
+                            ? `<span class="badge badge-success">Mavjud</span>` 
+                            : `<span class="badge badge-danger">Tugagan</span>`;
+                            
+                        const imgHTML = item.image 
+                            ? `<img src="${item.image.startsWith('http') || item.image.startsWith('data:') ? item.image : (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '') + item.image}" alt="${item.name}">` 
+                            : `<i class="fas fa-utensils"></i>`;
+                            
+                        itemsHTML += `
+                            <div class="menu-item-card">
+                                <div class="item-image">
+                                    ${imgHTML}
+                                    <div class="item-availability">${statusBadge}</div>
+                                </div>
+                                <div class="item-body">
+                                    <h4>${item.name}</h4>
+                                    <div class="price">${Number(item.price).toLocaleString()} so'm</div>
+                                     <div class="item-actions">
+                                         <a href="menu_item_form.html?item_id=${item.id}" class="btn btn-outline"><i class="fas fa-edit"></i> Tahrirlash</a>
+                                         <button onclick="deleteMenuItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="btn btn-danger" style="background: linear-gradient(135deg, #e74c3c, #c0392b); border: none; font-size: 0.8rem; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #fff; cursor: pointer; border-radius: 12px;"><i class="fas fa-trash-alt"></i> O'chirish</button>
+                                     </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                container.innerHTML += `
+                    <div class="card-category">
+                        <div class="category-header">
+                            <h3>${category.name}</h3>
+                            <span class="badge badge-info">${category.items.length} ta taom</span>
+                        </div>
+                        <div class="menu-grid">
+                            ${itemsHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Menu load error:', err);
+        }
+    }
+
+    async function deleteMenuItem(itemId, itemName) {
+        if (!confirm(`Haqiqatan ham "${itemName}" taomini menyudan butunlay o'chirmoqchimisiz?\n(Ushbu amalni ortga qaytarib bo'lmaydi!)`)) {
+            return;
+        }
+        try {
+            const res = await fetch(`/api/staff/menu/item/${itemId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadMenu();
+            } else {
+                showMessage(data.error || "O'chirishda xatolik yuz berdi", 'error');
+            }
+        } catch (err) {
+            console.error('Delete menu item error:', err);
+            showMessage("Tizim bilan bog'lanishda xatolik", 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadMenu();
+    });
+</script>
 </body>
 </html>

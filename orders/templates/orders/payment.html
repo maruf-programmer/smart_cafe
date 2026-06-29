@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}To'lov - Buyurtma #{{ order.id }}{% endblock %}
+{% block title %}To'lov{% endblock %}
 {% block header_title %}To'lov{% endblock %}
 
 {% block extra_css %}
@@ -201,22 +201,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="payment-container">
+<div class="payment-container" id="paymentContainer" style="display: none;">
     <div class="payment-3d">
         <div class="card-3d" id="card3d" onclick="this.classList.toggle('flipped')">
             <div class="card-face card-front">
                 <div>
                     <div class="card-chip"></div>
-                    <div class="card-number">•••• •••• •••• {{ order.id|stringformat:"04d" }}</div>
+                    <div class="card-number" id="lblCardNum">•••• •••• •••• 0000</div>
                 </div>
                 <div class="card-details">
                     <div>
                         <div style="font-size: 0.6rem; opacity: 0.6;">STOL</div>
-                        <div>#{{ order.table.number }}</div>
+                        <div id="lblCardTable">#0</div>
                     </div>
                     <div>
                         <div style="font-size: 0.6rem; opacity: 0.6;">SUMMA</div>
-                        <div>{{ order.total_price }} so'm</div>
+                        <div id="lblCardPrice">0 so'm</div>
                     </div>
                 </div>
             </div>
@@ -238,77 +238,149 @@
 
         <div class="payment-row">
             <span class="label">Buyurtma ID</span>
-            <span class="value">#{{ order.id }}</span>
+            <span class="value" id="lblOrderId">#0</span>
         </div>
         <div class="payment-row">
             <span class="label">Stol</span>
-            <span class="value">#{{ order.table.number }}</span>
+            <span class="value" id="lblTableNumber">#0</span>
         </div>
         <div class="payment-row">
             <span class="label">Sana</span>
-            <span class="value">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+            <span class="value" id="lblOrderDate">...</span>
         </div>
         <div class="payment-row">
             <span class="label">To'lov usuli</span>
-            <span class="value">{{ payment.get_method_display|default:"Kutilmoqda" }}</span>
+            <span class="value" id="lblPaymentMethod">Kutilmoqda</span>
         </div>
         <div class="payment-row">
             <span class="label">Holat</span>
-            <span class="value badge {% if payment.status == 'success' %}badge-delivered{% else %}badge-pending{% endif %}">
-                {{ payment.get_status_display|default:"Kutilmoqda" }}
-            </span>
+            <span class="value badge" id="lblPaymentStatus">Kutilmoqda</span>
         </div>
         <div class="payment-row total">
             <span>Jami:</span>
-            <span>{{ order.total_price }} so'm</span>
+            <span id="lblTotalPrice">0 so'm</span>
         </div>
     </div>
 
-    {% if payment %}
-    <div class="status-box {% if payment.status == 'success' %}status-success{% else %}status-pending{% endif %}">
-        <div class="status-anim">
-            {% if payment.status == 'success' %}
-            <i class="fas fa-check"></i>
-            {% else %}
-            <i class="fas fa-spinner"></i>
-            {% endif %}
-        </div>
-        {% if payment.status == 'success' %}
-        <h3>To'lov muvaffaqiyatli!</h3>
-        <p>Trnzaksiya: {{ payment.transaction_id }}</p>
-        {% else %}
-        <h3>To'lov qayta ishlanmoqda...</h3>
-        <p>Iltimos kuting</p>
-        {% endif %}
+    <div id="paymentStatusBox" style="display: none;">
+        <!-- Status box -->
     </div>
-    {% endif %}
 
-    {% if not payment or payment.status != 'success' %}
-    <form method="post" action="{% url 'orders:process_payment' order.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="method" value="card">
-        <button type="submit" class="btn btn-success" style="width: 100%; padding: 18px; font-size: 1.1rem;">
-            <i class="fas fa-lock"></i> To'lovni amalga oshirish
-        </button>
-    </form>
-    {% else %}
-    <div class="success-actions">
-        <a href="{% url 'core:complete_session' order.table.id %}?order_id={{ order.id }}" class="btn btn-success">
-            <i class="fas fa-check"></i> Yakunlash
-        </a>
-        <a href="{% url 'core:home' %}" class="btn btn-secondary">
-            <i class="fas fa-home"></i> Bosh sahifa
-        </a>
+    <div id="paymentActions">
+        <!-- Pay button or success links -->
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Auto-refresh if pending
-    {% if payment and payment.status == 'pending' %}
-    setTimeout(() => location.reload(), 3000);
-    {% endif %}
+    const orderId = "{{ order_id }}";
+
+    async function loadPaymentInfo() {
+        try {
+            const res = await fetch(`/api/orders/${orderId}/`);
+            if(!res.ok) {
+                showMessage('Buyurtma ma\'lumotlarini yuklashda xatolik', 'error');
+                return;
+            }
+            const order = await res.json();
+            
+            document.title = `To'lov - Buyurtma #${order.id}`;
+            document.getElementById('lblCardNum').innerText = `•••• •••• •••• ${String(order.id).padStart(4, '0')}`;
+            document.getElementById('lblCardTable').innerText = `#${order.table_detail.number}`;
+            document.getElementById('lblCardPrice').innerText = Number(order.total_price).toLocaleString() + ' so\'m';
+            
+            document.getElementById('lblOrderId').innerText = `#${order.id}`;
+            document.getElementById('lblTableNumber').innerText = `#${order.table_detail.number}`;
+            document.getElementById('lblOrderDate').innerText = new Date(order.created_at).toLocaleString('uz-UZ');
+            document.getElementById('lblTotalPrice').innerText = Number(order.total_price).toLocaleString() + ' so\'m';
+            
+            const payment = order.payment;
+            const statusBox = document.getElementById('paymentStatusBox');
+            const actions = document.getElementById('paymentActions');
+            
+            if (payment) {
+                document.getElementById('lblPaymentMethod').innerText = payment.method_display;
+                const statusBadge = document.getElementById('lblPaymentStatus');
+                statusBadge.innerText = payment.status_display;
+                statusBadge.className = 'value badge ' + (payment.status === 'success' ? 'badge-delivered' : 'badge-pending');
+                
+                statusBox.style.display = 'block';
+                statusBox.className = 'status-box ' + (payment.status === 'success' ? 'status-success' : 'status-pending');
+                statusBox.innerHTML = `
+                    <div class="status-anim">
+                        ${payment.status === 'success' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-spinner"></i>'}
+                    </div>
+                    <h3>${payment.status === 'success' ? 'To\'lov muvaffaqiyatli!' : 'To\'lov qayta ishlanmoqda...'}</h3>
+                    <p>${payment.status === 'success' ? 'Tranzaksiya: ' + payment.transaction_id : 'Iltimos kuting'}</p>
+                `;
+            }
+            
+            if (payment && payment.status === 'success') {
+                actions.innerHTML = `
+                    <div class="success-actions">
+                        <a href="/complete/${order.table}/?order_id=${order.id}" class="btn btn-success">
+                            <i class="fas fa-check"></i> Yakunlash
+                        </a>
+                        <a href="/" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Bosh sahifa
+                        </a>
+                    </div>
+                `;
+            } else {
+                actions.innerHTML = `
+                    <button onclick="processPayment()" class="btn btn-success" style="width: 100%; padding: 18px; font-size: 1.1rem;">
+                        <i class="fas fa-lock"></i> To'lovni amalga oshirish
+                    </button>
+                `;
+            }
+            
+            document.getElementById('paymentContainer').style.display = 'block';
+        } catch (err) {
+            console.error('Payment info load error:', err);
+        }
+    }
+
+    async function processPayment() {
+        try {
+            const res = await fetch(`/api/orders/${orderId}/payment/process/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ method: 'card' })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadPaymentInfo();
+            } else {
+                showMessage(data.error || 'To\'lovda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Process payment error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPaymentInfo();
+    });
 </script>
 {% endblock %}

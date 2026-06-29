@@ -94,6 +94,7 @@ class MenuItem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items', verbose_name='Kategoriya')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Narxi (so\'m)')
     image = models.CharField(max_length=200, blank=True, verbose_name='Rasm (URL)')
+    images = models.JSONField(default=list, blank=True, verbose_name='Rasmlar ro\'yxati')
     is_available = models.BooleanField(default=True, verbose_name='Mavjud')
     prep_time_minutes = models.IntegerField(default=20, verbose_name="Tayyorlash vaqti (daqiqa)")
     serving_options = models.JSONField(default=list, blank=True, verbose_name='Porsiya turlari')

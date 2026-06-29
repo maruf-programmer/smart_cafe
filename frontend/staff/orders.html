@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+    <script src="../js/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Boshqaruv Paneli{% endblock %}</title>
+    <title>Buyurtmalar - Cafe Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -320,7 +321,119 @@
             .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
-    {% block extra_css %}{% endblock %}
+    <style>
+    .orders-page-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(rgba(11, 15, 25, 0.85), rgba(17, 24, 39, 0.95)), 
+                    url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+        z-index: -1;
+    }
+
+    .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 20px;
+    }
+
+    .order-slip {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .order-slip:hover {
+        transform: translateY(-5px);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .order-slip.pending { border-top: 6px solid var(--warning); }
+    .order-slip.preparing { border-top: 6px solid var(--primary); }
+    .order-slip.ready { border-top: 6px solid var(--success); }
+
+    .slip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed rgba(255,255,255,0.1);
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+    }
+
+    .slip-header h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .slip-items {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+    }
+
+    .slip-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .slip-item:last-child { border: none; }
+    .slip-item .qty { color: #f39c12; font-weight: 700; }
+
+    .slip-notes {
+        background: rgba(245, 158, 11, 0.05);
+        border: 1px solid rgba(245, 158, 11, 0.1);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+        color: #fbbf24;
+        margin-bottom: 20px;
+    }
+
+    .slip-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 12px;
+        margin-bottom: 16px;
+    }
+
+    .slip-footer .total {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .slip-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .slip-actions select {
+        flex: 1;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border);
+        color: #fff;
+        border-radius: 10px;
+        padding: 8px;
+        outline: none;
+    }
+</style>
 </head>
 <body>
     <div class="sidebar">
@@ -329,29 +442,29 @@
             <h2>Cafe Admin</h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="{% url 'core:staff_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+            <a href="staff/dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{% url 'core:staff_orders' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_orders' %}active{% endif %}">
+            <a href="orders.html" class="nav-item">
                 <i class="fas fa-shopping-bag"></i>
                 <span>Buyurtmalar</span>
             </a>
-            <a href="{% url 'core:staff_calls' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_calls' %}active{% endif %}">
+            <a href="calls.html" class="nav-item">
                 <i class="fas fa-bell"></i>
                 <span>Chaqiruvlar</span>
             </a>
-            <a href="{% url 'core:staff_menu' %}" class="nav-item {% if 'menu' in request.path %}active{% endif %}">
+            <a href="../menu.html" class="nav-item">
                 <i class="fas fa-utensils"></i>
                 <span>Menyu</span>
             </a>
-            <a href="{% url 'core:staff_tables' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_tables' %}active{% endif %}">
+            <a href="tables.html" class="nav-item">
                 <i class="fas fa-chair"></i>
                 <span>Stollar</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="/admin/logout/" class="nav-item">
+            <a href=API_BASE_URL + "/admin/logout/" class="nav-item">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Chiqish</span>
             </a>
@@ -370,15 +483,24 @@
 
         <div class="top-bar">
             <div class="page-title">
-                <h1>{% block page_title %}Xush kelibsiz!{% endblock %}</h1>
-                <p>{% block page_subtitle %}Boshqaruv Cockpit Panel{% endblock %}</p>
+                <h1>Buyurtmalar boshqaruvi</h1>
+                <p>Boshqaruv Panel</p>
             </div>
             <div class="top-bar-actions">
-                {% block top_actions %}{% endblock %}
+                <div style="display: flex; gap: 10px;">
+    <button onclick="filterStatus('pending')" class="btn btn-outline" id="btn-pending">Kutilmoqda</button>
+    <button onclick="filterStatus('preparing')" class="btn btn-outline" id="btn-preparing">Tayyorlanmoqda</button>
+    <button onclick="filterStatus('ready')" class="btn btn-outline" id="btn-ready">Tayyor</button>
+    <button onclick="filterStatus('')" class="btn btn-outline" id="btn-all">Faol hammasi</button>
+</div>
             </div>
         </div>
 
-        {% block content %}{% endblock %}
+        <div class="orders-page-bg"></div>
+
+<div class="orders-grid" id="ordersContainer">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Yuklanmoqda...</div>
+</div>
     </main>
 
     <script>
@@ -404,6 +526,144 @@
             });
         }, 3000);
     </script>
-    {% block extra_js %}{% endblock %}
+    <script>
+    let currentStatusFilter = new URLSearchParams(window.location.search).get('status') || '';
+
+    async function loadOrders() {
+        try {
+            document.querySelectorAll('.top-bar-actions .btn').forEach(btn => btn.classList.remove('active'));
+            if (currentStatusFilter === 'pending') document.getElementById('btn-pending').classList.add('active');
+            else if (currentStatusFilter === 'preparing') document.getElementById('btn-preparing').classList.add('active');
+            else if (currentStatusFilter === 'ready') document.getElementById('btn-ready').classList.add('active');
+            else document.getElementById('btn-all').classList.add('active');
+
+            const res = await fetch(API_BASE_URL + `/api/staff/orders/?status=${currentStatusFilter}`, { credentials: 'include' });
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '';
+            
+            if (data.orders.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">Buyurtmalar topilmadi</div>`;
+                return;
+            }
+            
+            data.orders.forEach(order => {
+                let itemsHTML = '';
+                order.items.forEach(item => {
+                    itemsHTML += `
+                        <li class="slip-item">
+                            <span>${item.menu_item_detail ? item.menu_item_detail.name : 'Taom'}</span>
+                            <span class="qty">${item.quantity} x ${item.servings} kishilik</span>
+                        </li>
+                    `;
+                });
+                
+                let notesHTML = '';
+                if (order.notes) {
+                    notesHTML = `
+                        <div class="slip-notes">
+                            <i class="fas fa-comment-alt" style="margin-right: 5px;"></i> ${order.notes}
+                        </div>
+                    `;
+                }
+                
+                let selectHTML = `<select id="statusSelect-${order.id}">`;
+                for (const [code, label] of Object.entries(data.status_choices)) {
+                    const selected = order.status === code ? 'selected' : '';
+                    selectHTML += `<option value="${code}" ${selected}>${label}</option>`;
+                }
+                selectHTML += `</select>`;
+                
+                let slipClass = 'preparing';
+                if (order.status === 'pending') slipClass = 'pending';
+                else if (order.status === 'ready') slipClass = 'ready';
+                
+                const time = new Date(order.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+                
+                container.innerHTML += `
+                    <div class="order-slip ${slipClass}">
+                        <div>
+                            <div class="slip-header">
+                                <h3>Buyurtma #${order.id}</h3>
+                                <span class="badge badge-info">Stol ${order.table_detail.number}</span>
+                            </div>
+                            <ul class="slip-items">
+                                ${itemsHTML}
+                            </ul>
+                            ${notesHTML}
+                        </div>
+                        <div>
+                            <div class="slip-footer">
+                                <span>Vaqt: ${time}</span>
+                                <span class="total">${Number(order.total_price).toLocaleString()} so'm</span>
+                            </div>
+                            <div class="slip-actions">
+                                ${selectHTML}
+                                <button onclick="updateStatus(${order.id})" class="btn btn-primary" style="padding: 10px 14px;"><i class="fas fa-check"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error('Orders load error:', err);
+        }
+    }
+
+    function filterStatus(status) {
+        currentStatusFilter = status;
+        const url = new URL(window.location);
+        if (status) url.searchParams.set('status', status);
+        else url.searchParams.delete('status');
+        window.history.pushState({}, '', url);
+        loadOrders();
+    }
+
+    async function updateStatus(orderId) {
+        const select = document.getElementById(`statusSelect-${orderId}`);
+        const status = select.value;
+        try {
+            const res = await fetch(`/api/staff/orders/${orderId}/update-status/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMessage(data.message, 'success');
+                loadOrders();
+            } else {
+                showMessage(data.error || 'Yangilashda xatolik', 'error');
+            }
+        } catch (err) {
+            console.error('Update status error:', err);
+            showMessage('Tizim bilan bog\'lanishda xatolik', 'error');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadOrders();
+    });
+</script>
 </body>
 </html>
