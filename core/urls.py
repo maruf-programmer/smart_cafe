@@ -22,5 +22,6 @@ urlpatterns = [
     path('staff/menu/item/add/', admin_views.menu_item_add, name='menu_item_add'),
     path('staff/menu/item/<int:item_id>/edit/', admin_views.menu_item_edit, name='menu_item_edit'),
     path('staff/tables/', admin_views.table_management, name='staff_tables'),
+    path('staff/messages/', admin_views.staff_messages, name='staff_messages'),
     path('api/debug/', views.debug_view, name='debug_view'),
 ]

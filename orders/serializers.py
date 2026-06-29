@@ -41,3 +41,18 @@ class WaiterCallSerializer(serializers.ModelSerializer):
         model = WaiterCall
         fields = ['id', 'table', 'table_detail', 'reason', 'created_at', 'is_answered', 'answered_at', 'reply_message', 'staff_phone']
         read_only_fields = ['created_at', 'is_answered', 'answered_at', 'reply_message', 'staff_phone']
+
+
+from .models import TableMessage
+
+class TableMessageSerializer(serializers.ModelSerializer):
+    table_detail = TableSerializer(source='table', read_only=True)
+    created_at_formatted = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TableMessage
+        fields = ['id', 'table', 'table_detail', 'sender', 'message', 'created_at', 'created_at_formatted', 'is_read']
+        read_only_fields = ['created_at', 'is_read']
+
+    def get_created_at_formatted(self, obj):
+        return obj.created_at.strftime('%H:%M')

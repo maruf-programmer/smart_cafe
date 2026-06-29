@@ -89,3 +89,8 @@ def menu_item_edit(request, item_id):
 @staff_member_required
 def table_management(request):
     return render(request, 'staff/tables.html')
+
+
+@staff_member_required
+def staff_messages(request):
+    return render(request, 'staff/messages.html')

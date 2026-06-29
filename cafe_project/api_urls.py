@@ -28,6 +28,9 @@ urlpatterns = [
     path('waiter-calls/call/<int:table_id>/', orders_api.call_waiter_api, name='api_call_waiter'),
     path('waiter-calls/latest/<int:table_id>/', orders_api.get_latest_call, name='api_get_latest_call'),
     path('waiter-calls/active/<int:table_id>/', orders_api.get_active_calls, name='api_get_active_calls'),
+    path('tables/<int:table_id>/messages/', orders_api.get_table_messages, name='api_get_table_messages'),
+    path('tables/<int:table_id>/messages/send/', orders_api.send_table_message, name='api_send_table_message'),
+    path('staff/messages/', orders_api.get_staff_chats, name='api_get_staff_chats'),
 
     # Feedback
     path('feedback/<int:table_id>/', feedback_api.submit_feedback_api, name='api_submit_feedback'),

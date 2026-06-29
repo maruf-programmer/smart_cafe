@@ -1,0 +1,440 @@
+{% extends 'staff/base_staff.html' %}
+
+{% block title %}Xabarlar - Cafe Admin{% endblock %}
+{% block page_title %}Xabarlar (Telegram-style Chat Dashboard){% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-dashboard {
+        display: flex;
+        height: calc(100vh - 160px);
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    /* Contacts Sidebar */
+    .chat-sidebar {
+        width: 320px;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        background: rgba(17, 24, 39, 0.4);
+    }
+
+    .sidebar-search {
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .contacts-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .contact-card {
+        padding: 15px;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+        border: 1px solid transparent;
+    }
+
+    .contact-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .contact-card.active {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .contact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .contact-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #fff;
+    }
+
+    .contact-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .contact-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .contact-preview {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+    }
+
+    .unread-badge {
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 20px;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* Main Chat Window */
+    .chat-window {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(17, 24, 39, 0.2);
+    }
+
+    .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(17, 24, 39, 0.3);
+    }
+
+    .chat-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .chat-body-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .chat-bubble {
+        max-width: 65%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        word-break: break-word;
+        position: relative;
+    }
+
+    .chat-bubble.customer {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+    }
+
+    .chat-bubble.staff {
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+
+    .bubble-meta {
+        font-size: 0.65rem;
+        opacity: 0.6;
+        display: block;
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    .chat-footer {
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(17, 24, 39, 0.3);
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+    }
+
+    .chat-footer textarea {
+        flex: 1;
+        height: 48px;
+        padding: 12px 15px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        color: #fff;
+        resize: none;
+        outline: none;
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .chat-footer textarea:focus {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .chat-placeholder {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 40px;
+    }
+
+    .chat-placeholder i {
+        font-size: 4rem;
+        color: rgba(99, 102, 241, 0.2);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-dashboard">
+    <!-- Contacts Sidebar -->
+    <div class="chat-sidebar">
+        <div class="sidebar-search">
+            <h4 style="font-size: 1rem; color: #fff;"><i class="fas fa-users"></i> Stol chatlari</h4>
+        </div>
+        <div class="contacts-list" id="contactsContainer">
+            <!-- Table contacts will load here -->
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">Yuklanmoqda...</div>
+        </div>
+    </div>
+
+    <!-- Main Chat Pane -->
+    <div class="chat-window" id="chatWindowArea">
+        <div class="chat-placeholder">
+            <i class="fas fa-comments"></i>
+            <h3>Muloqotni Boshlang</h3>
+            <p>Mijozlar bilan jonli yozishish uchun chap ro'yxatdan stol tanlang.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeTableId = null;
+    let pollChatsInterval = null;
+    let pollMessagesInterval = null;
+
+    async function loadChatsList() {
+        try {
+            const res = await fetch('/api/staff/messages/');
+            if (!res.ok) return;
+            const chats = await res.json();
+            
+            const container = document.getElementById('contactsContainer');
+            if (chats.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Hozircha xabarlar yo'q</div>`;
+                return;
+            }
+
+            let html = '';
+            chats.forEach(chat => {
+                const isActive = chat.table_id === activeTableId ? 'active' : '';
+                const unreadBadge = chat.unread_count > 0 ? `<span class="unread-badge">${chat.unread_count}</span>` : '';
+                const senderLabel = chat.sender === 'staff' ? 'Siz: ' : '';
+                
+                html += `
+                    <div class="contact-card ${isActive}" onclick="selectChat(${chat.table_id}, ${chat.table_number})">
+                        <div class="contact-header">
+                            <span class="contact-name">Stol #${chat.table_number}</span>
+                            <span class="contact-time">${chat.latest_message_time}</span>
+                        </div>
+                        <div class="contact-body">
+                            <span class="contact-preview">${senderLabel}${chat.latest_message}</span>
+                            ${unreadBadge}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Error loading chats list:', err);
+        }
+    }
+
+    function selectChat(tableId, tableNumber) {
+        activeTableId = tableId;
+        
+        // Render chat window skeleton
+        const windowArea = document.getElementById('chatWindowArea');
+        windowArea.innerHTML = `
+            <div class="chat-header">
+                <h3>Stol #${tableNumber} bilan chat</h3>
+                <button onclick="finalizeTableSession(${tableId}, ${tableNumber})" class="btn btn-success" style="padding: 8px 15px; font-size: 0.85rem; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> Sessiyani Yakunlash
+                </button>
+            </div>
+            
+            <div class="chat-body-messages" id="messagesBox">
+                <!-- Messages load here -->
+            </div>
+            
+            <div class="chat-footer">
+                <textarea id="staffChatInput" placeholder="Xabaringizni yozing..." onkeypress="handleStaffKey(event)"></textarea>
+                <button onclick="sendStaffMessage()" class="btn btn-primary" style="height: 48px; padding: 0 25px; border-radius: 14px; font-weight: 600;">
+                    Yuborish <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+                </button>
+            </div>
+        `;
+
+        loadMessages(true);
+
+        // Start message polling
+        if (pollMessagesInterval) clearInterval(pollMessagesInterval);
+        pollMessagesInterval = setInterval(() => loadMessages(false), 3000);
+
+        // Highlight selected card
+        document.querySelectorAll('.contact-card').forEach(card => card.classList.remove('active'));
+        loadChatsList(); // Re-render sidebar to clear unread counts immediately
+    }
+
+    async function loadMessages(shouldScroll) {
+        if (!activeTableId) return;
+
+        try {
+            // Retrieve messages and mark read
+            const res = await fetch(`/api/tables/${activeTableId}/messages/?mark_read=true`);
+            if (!res.ok) return;
+            const msgs = await res.json();
+            
+            const box = document.getElementById('messagesBox');
+            if (!box) return;
+
+            let html = '';
+            if (msgs.length === 0) {
+                box.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 100px;">Chat bo'sh. Birinchi bo'lib xabar yuboring!</div>`;
+                return;
+            }
+
+            msgs.forEach(msg => {
+                const bubbleClass = msg.sender === 'staff' ? 'staff' : 'customer';
+                html += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        ${msg.message}
+                        <span class="bubble-meta">${msg.created_at_formatted}</span>
+                    </div>
+                `;
+            });
+            box.innerHTML = html;
+
+            if (shouldScroll) {
+                box.scrollTop = box.scrollHeight;
+            }
+        } catch (err) {
+            console.error('Error loading messages:', err);
+        }
+    }
+
+    async function sendStaffMessage() {
+        if (!activeTableId) return;
+        const input = document.getElementById('staffChatInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+            const res = await fetch(`/api/tables/${activeTableId}/messages/send/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ message: text, sender: 'staff' })
+            });
+            if (res.ok) {
+                input.value = '';
+                loadMessages(true);
+                loadChatsList();
+            } else {
+                showMessage("Xabar yuborilmadi", "error");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function handleStaffKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendStaffMessage();
+        }
+    }
+
+    async function finalizeTableSession(tableId, tableNumber) {
+        if (!confirm(`Stol #${tableNumber} to'lovini qabul qilib sessiyani yopmoqchimisiz?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/tables/${tableId}/free/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            if (res.ok) {
+                showMessage(`Stol #${tableNumber} sessiyasi yakunlandi!`, "success");
+                activeTableId = null;
+                document.getElementById('chatWindowArea').innerHTML = `
+                    <div class="chat-placeholder">
+                        <i class="fas fa-comments"></i>
+                        <h3>Muloqotni Boshlang</h3>
+                        <p>Mijozlar bilan jonli yozishish uchun chap ro'yxatdan stol tanlang.</p>
+                    </div>
+                `;
+                loadChatsList();
+            } else {
+                showMessage("Stolni bo'shatishda xatolik", "error");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadChatsList();
+        pollChatsInterval = setInterval(loadChatsList, 5000);
+    });
+</script>
+{% endblock %}

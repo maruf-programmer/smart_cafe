@@ -530,32 +530,42 @@
                 </button>
             </div>
 
-            <!-- Cash Payment Panel (Waiter Call & Chat) -->
+            <!-- Cash Payment Panel (Waiter Call & Chat Toggle) -->
             <div id="cashPaymentPanel" style="margin-top: 25px;">
                 <div class="glass-card" style="padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-align: left; margin-bottom: 20px;">
                     <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 12px;"><i class="fas fa-receipt"></i> Chek to'lash tartibi</h4>
                     <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 15px;">
-                        Naqd pul orqali to'lash uchun quyidagi tugmani bosib ofitsiantni chaqiring. Ofitsiant kelib to'lovni oladi va stolni yakunlaydi.
+                        Naqd pul orqali to'lash uchun quyidagi tugmani bosib ofitsiantni chaqiring. Fikr-mulohaza qoldirish yoki xabar yozish uchun chat oynasini ochishingiz mumkin.
                     </p>
+                    
                     <div id="waiterStatusArea" style="margin-bottom: 15px;">
-                        <!-- Status here -->
+                        <!-- Status message -->
                     </div>
-                    <button id="btnCallWaiter" type="button" onclick="requestWaiterForCash()" class="btn btn-success" style="width: 100%; justify-content: center; padding: 14px; font-weight: 600;">
-                        <i class="fas fa-bell"></i> Ofitsiantni Chaqirish (Naqd to'lov)
-                    </button>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="btnCallWaiter" type="button" onclick="requestWaiterForCash()" class="btn btn-success" style="flex: 1; justify-content: center; padding: 14px; font-weight: 600;">
+                            <i class="fas fa-bell"></i> Ofitsiantni Chaqirish
+                        </button>
+                        <button id="btnToggleChat" type="button" onclick="toggleChatArea()" class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 14px; font-weight: 600;">
+                            <i class="fas fa-comments"></i> Xabar yozish
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Chat Container -->
-                <div class="glass-card" style="padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-align: left;">
-                    <h4 style="font-size: 1.1rem; color: var(--green-light); margin-bottom: 12px;"><i class="fas fa-comments"></i> Admin/Ofitsiant bilan chat</h4>
+                <!-- Chat Area (Initially Hidden) -->
+                <div id="chatArea" class="glass-card" style="display: none; padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-align: left; margin-bottom: 20px; transition: all 0.3s;">
+                    <h4 style="font-size: 1.1rem; color: var(--green-light); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-comments"></i> Xabar yozish (Admin bilan chat)</span>
+                        <button type="button" onclick="toggleChatArea()" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
+                    </h4>
                     
-                    <div id="chatMessages" style="height: 180px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem; text-align: center; margin-top: 70px;">Chat bo'sh. Chaqiruv yuborilgach chat faollashadi.</div>
+                    <div id="chatMessages" style="height: 250px; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; text-align: center; margin-top: 100px;">Chat bo'sh. Xabar yozing...</div>
                     </div>
 
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="chatInput" placeholder="Xabar yozing..." class="btn btn-outline" style="flex: 1; text-align: left; background: rgba(255,255,255,0.05); color: #fff; padding: 10px 15px;" onkeypress="handleChatKey(event)">
-                        <button type="button" onclick="sendChatMessage()" class="btn btn-primary" style="padding: 10px 20px;">Yuborish</button>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <textarea id="chatInput" placeholder="Xabaringizni bu yerga batafsil yozing..." class="btn btn-outline" style="flex: 1; height: 50px; text-align: left; background: rgba(255,255,255,0.05); color: #fff; padding: 10px 15px; resize: none; border-radius: 10px; font-family: inherit; font-size: 0.9rem;" onkeypress="handleChatKey(event)"></textarea>
+                        <button type="button" onclick="sendChatMessage()" class="btn btn-primary" style="height: 50px; padding: 0 25px; border-radius: 10px; font-weight: 600;">Yuborish</button>
                     </div>
                 </div>
             </div>
@@ -593,6 +603,7 @@
     const tableId = "{{ table_id }}";
 
     let pollInterval = null;
+    let isChatOpen = false;
 
     function selectPayment(btn, method) {
         document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
@@ -613,10 +624,25 @@
         }
     }
 
+    function toggleChatArea() {
+        const chatArea = document.getElementById('chatArea');
+        const btnToggleChat = document.getElementById('btnToggleChat');
+        isChatOpen = !isChatOpen;
+        if (isChatOpen) {
+            chatArea.style.display = 'block';
+            chatArea.scrollIntoView({ behavior: 'smooth' });
+            btnToggleChat.classList.add('active');
+            pollActiveMessages();
+        } else {
+            chatArea.style.display = 'none';
+            btnToggleChat.classList.remove('active');
+        }
+    }
+
     function startChatPolling() {
         if (pollInterval) clearInterval(pollInterval);
-        pollActiveCalls();
-        pollInterval = setInterval(pollActiveCalls, 3000);
+        pollActiveMessages();
+        pollInterval = setInterval(pollActiveMessages, 3000);
     }
 
     function stopChatPolling() {
@@ -626,7 +652,7 @@
         }
     }
 
-    async function pollActiveCalls() {
+    async function pollActiveMessages() {
         try {
             const tableRes = await fetch(API_BASE_URL + '/api/tables/', { credentials: 'include' });
             const tables = await tableRes.json();
@@ -647,65 +673,72 @@
                 return;
             }
 
-            const res = await fetch(API_BASE_URL + `/api/waiter-calls/active/${tableId}/`, { credentials: 'include' });
-            if (!res.ok) return;
-            const calls = await res.json();
-
-            const chatMessages = document.getElementById('chatMessages');
-            const waiterStatusArea = document.getElementById('waiterStatusArea');
+            // Check waiter call status
+            const callRes = await fetch(API_BASE_URL + `/api/waiter-calls/latest/${tableId}/`, { credentials: 'include' });
+            const statusArea = document.getElementById('waiterStatusArea');
             const btnCallWaiter = document.getElementById('btnCallWaiter');
-
-            if (calls.length === 0) {
-                chatMessages.innerHTML = `<div style="color: rgba(255,255,255,0.4); font-size: 0.8rem; text-align: center; margin-top: 70px;">Chat bo'sh. Chaqiruv yuborilgach chat faollashadi.</div>`;
-                waiterStatusArea.innerHTML = '';
-                btnCallWaiter.style.display = 'block';
-                return;
-            }
-
-            chatMessages.innerHTML = '';
-            calls.forEach(call => {
-                chatMessages.innerHTML += `
-                    <div class="chat-bubble customer">
-                        ${call.reason}
-                    </div>
-                `;
-                
-                if (call.is_answered && call.reply_message) {
-                    chatMessages.innerHTML += `
-                        <div class="chat-bubble waiter">
-                            ${call.reply_message}
+            
+            if (callRes.ok) {
+                const call = await callRes.json();
+                if (!call.is_answered) {
+                    statusArea.innerHTML = `
+                        <div class="status-glowing-yellow">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Ofitsiant chaqirildi! Kelmoqda...</span>
                         </div>
                     `;
+                    btnCallWaiter.innerHTML = `<i class="fas fa-check"></i> Chaqirildi`;
+                    btnCallWaiter.disabled = true;
+                } else {
+                    statusArea.innerHTML = `
+                        <div class="status-glowing-green">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ofitsiant javob berdi: "${call.reply_message}"</span>
+                        </div>
+                    `;
+                    btnCallWaiter.innerHTML = `<i class="fas fa-bell"></i> Ofitsiantni chaqirish`;
+                    btnCallWaiter.disabled = false;
                 }
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            const latestCall = calls[calls.length - 1];
-            if (!latestCall.is_answered) {
-                waiterStatusArea.innerHTML = `
-                    <div class="status-glowing-yellow">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Ofitsiant chaqirildi! Kutilmoqda...</span>
-                    </div>
-                `;
-                btnCallWaiter.style.display = 'none';
             } else {
-                waiterStatusArea.innerHTML = `
-                    <div class="status-glowing-green">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Ofitsiant javobi: "${latestCall.reply_message}"</span>
-                    </div>
-                `;
-                btnCallWaiter.style.display = 'block';
-                btnCallWaiter.innerHTML = `<i class="fas fa-bell"></i> Ofitsiantni qayta chaqirish`;
+                statusArea.innerHTML = '';
+                btnCallWaiter.innerHTML = `<i class="fas fa-bell"></i> Ofitsiantni chaqirish`;
+                btnCallWaiter.disabled = false;
+            }
+
+            // Fetch chat messages if chat is open
+            if (isChatOpen) {
+                const msgRes = await fetch(API_BASE_URL + `/api/tables/${tableId}/messages/`, { credentials: 'include' });
+                if (!msgRes.ok) return;
+                const msgs = await msgRes.json();
+
+                const chatMessages = document.getElementById('chatMessages');
+                if (msgs.length === 0) {
+                    chatMessages.innerHTML = `<div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; text-align: center; margin-top: 100px;">Chat bo'sh. Xabar yozing...</div>`;
+                    return;
+                }
+
+                chatMessages.innerHTML = '';
+                msgs.forEach(msg => {
+                    const bubbleClass = msg.sender === 'customer' ? 'customer' : 'waiter';
+                    chatMessages.innerHTML += `
+                        <div class="chat-bubble ${bubbleClass}">
+                            ${msg.message}
+                            <span style="font-size: 0.65rem; display: block; text-align: right; opacity: 0.6; margin-top: 4px;">${msg.created_at_formatted}</span>
+                        </div>
+                    `;
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         } catch (err) {
-            console.error('Polling calls error:', err);
+            console.error('Polling error:', err);
         }
     }
 
     async function requestWaiterForCash() {
         try {
+            const btnCallWaiter = document.getElementById('btnCallWaiter');
+            btnCallWaiter.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Chaqirilmoqda...`;
+            
             const res = await fetch(`/api/waiter-calls/call/${tableId}/`, {
                 method: 'POST',
                 headers: {
@@ -716,9 +749,11 @@
             });
             if (res.ok) {
                 showMessage("Ofitsiant chaqirildi!", "success");
-                pollActiveCalls();
+                pollActiveMessages();
             } else {
                 showMessage("Chaqiruvda xatolik yuz berdi", "error");
+                btnCallWaiter.innerHTML = `<i class="fas fa-bell"></i> Ofitsiantni chaqirish`;
+                btnCallWaiter.disabled = false;
             }
         } catch (err) {
             console.error(err);
@@ -731,17 +766,17 @@
         if (!text) return;
 
         try {
-            const res = await fetch(`/api/waiter-calls/call/${tableId}/`, {
+            const res = await fetch(`/api/tables/${tableId}/messages/send/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify({ reason: text })
+                body: JSON.stringify({ message: text, sender: 'customer' })
             });
             if (res.ok) {
                 input.value = '';
-                pollActiveCalls();
+                pollActiveMessages();
             } else {
                 showMessage("Xabar yuborilmadi", "error");
             }
@@ -751,7 +786,8 @@
     }
 
     function handleChatKey(e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             sendChatMessage();
         }
     }
@@ -804,13 +840,11 @@
         try {
             let res;
             if (actionType === 'pay') {
-                // Free the table via cleaning status
                 res = await fetch(`/api/tables/${tableId}/free/`, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCookie('csrftoken') }
                 });
             } else {
-                // Direct mark free
                 res = await fetch(`/api/tables/${tableId}/mark-free/`, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCookie('csrftoken') }

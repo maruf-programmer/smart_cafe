@@ -130,3 +130,23 @@ class WaiterCall(models.Model):
         self.answered_at = timezone.now()
         self.save()
         return True
+
+
+class TableMessage(models.Model):
+    SENDER_CHOICES = [
+        ('customer', 'Mijoz'),
+        ('staff', 'Xodim'),
+    ]
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='messages', verbose_name='Stol')
+    sender = models.CharField(max_length=20, choices=SENDER_CHOICES, default='customer', verbose_name='Yuboruvchi')
+    message = models.TextField(verbose_name='Xabar')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yuborilgan vaqt')
+    is_read = models.BooleanField(default=False, verbose_name='O\'qildi')
+
+    class Meta:
+        verbose_name = 'Stol xabari'
+        verbose_name_plural = 'Stol xabarlari'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.sender.upper()} - Stol {self.table.number}: {self.message[:20]}"

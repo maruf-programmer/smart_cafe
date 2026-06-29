@@ -217,3 +217,68 @@ def reply_to_call_api(request, call_id):
     message = request.data.get('reply_message', '')
     call.reply_with_message(message)
     return Response({'status': 'success', 'message': 'Javob yuborildi'})
+
+
+from .models import TableMessage
+from .serializers import TableMessageSerializer
+
+@api_view(['GET'])
+def get_table_messages(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    from django.utils import timezone
+    if table.current_session_start:
+        messages_queryset = TableMessage.objects.filter(table=table, created_at__gte=table.current_session_start).order_by('created_at')
+    else:
+        two_hours_ago = timezone.now() - timezone.timedelta(hours=2)
+        messages_queryset = TableMessage.objects.filter(table=table, created_at__gte=two_hours_ago).order_by('created_at')
+    
+    if request.GET.get('mark_read') == 'true':
+        messages_queryset.filter(sender='customer', is_read=False).update(is_read=True)
+        
+    serializer = TableMessageSerializer(messages_queryset, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def send_table_message(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    sender = request.data.get('sender', 'customer')
+    message_text = request.data.get('message', '').strip()
+    
+    if not message_text:
+        return Response({'error': 'Xabar matni bo\'sh bo\'lishi mumkin emas!'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    message = TableMessage.objects.create(
+        table=table,
+        sender=sender,
+        message=message_text,
+    )
+    
+    serializer = TableMessageSerializer(message)
+    return Response({
+        'status': 'success',
+        'message': 'Xabar yuborildi',
+        'chat_message': serializer.data
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_staff_chats(request):
+    active_tables = Table.objects.filter(is_active=True).exclude(current_session_start=None)
+    chats = []
+    for table in active_tables:
+        session_msgs = TableMessage.objects.filter(table=table, created_at__gte=table.current_session_start).order_by('created_at')
+        if session_msgs.exists():
+            latest_msg = session_msgs.last()
+            unread_count = session_msgs.filter(sender='customer', is_read=False).count()
+            
+            chats.append({
+                'table_id': table.id,
+                'table_number': table.number,
+                'latest_message': latest_msg.message,
+                'latest_message_time': latest_msg.created_at.strftime('%H:%M'),
+                'unread_count': unread_count,
+                'sender': latest_msg.sender
+            })
+    return Response(chats)
