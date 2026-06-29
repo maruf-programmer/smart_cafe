@@ -100,9 +100,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Session and CSRF configurations for cross-origin credentials
 SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = not DEBUG
 # Allow session-based operations over CORS locally (helps with testing on Chrome)
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
