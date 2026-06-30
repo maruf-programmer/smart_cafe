@@ -1,8 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
+
+def custom_staff_member_required(view_func):
+    decorator = user_passes_test(
+        lambda u: u.is_active and u.is_staff,
+        login_url='core:staff_login'
+    )
+    return decorator(view_func)
+
+staff_member_required = custom_staff_member_required
 
 
 def staff_login_view(request):
