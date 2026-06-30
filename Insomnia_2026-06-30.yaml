@@ -1,0 +1,1533 @@
+type: spec.insomnia.rest/5.0
+schema_version: "5.1"
+name: Smart Cafe API Specification 1.0.0
+meta:
+  id: wrk_d7c42f03bbe94a048ff3bd52855e0893
+  created: 1782740667358
+  modified: 1782740667358
+  description: ""
+collection:
+  - name: Mijoz - Umumiy
+    meta:
+      id: fld_344d11c04dd5415fadacef518d75ae42
+      created: 1782740667368
+      modified: 1782740667368
+      sortKey: -1782740667368
+      description: Reklama, statistika va faol ofitsiantlar ro'yxati kabi umumiy yordamchi API yo'llari
+    children:
+      - url: http://127.0.0.1:8000/api/advertisements/
+        name: Faol reklamalar ro'yxatini olish
+        meta:
+          id: req_4393b40fca054abfb145ac05e332bf61
+          created: 1782740667375
+          modified: 1782741025893
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667375
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/home-stats/
+        name: Bosh sahifa uchun umumiy statistikalarni olish
+        meta:
+          id: req_6a5fdb72f60f4154b37132e6430de1cb
+          created: 1782740667375
+          modified: 1782741055485
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667375
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/waiters/
+        name: Faol ofitsiantlar ro'yxatini olish
+        meta:
+          id: req_71c6cb6d23474e099255415dfef5e706
+          created: 1782740667376
+          modified: 1782741186395
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667376
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Mijoz - Stollar
+    meta:
+      id: fld_7de60dc1eb3c49f5a82e8e3331fcae13
+      created: 1782740667369
+      modified: 1782740667369
+      sortKey: -1782740667369
+      description: Stol tanlash, holatni kuzatish va sessiyani o'rnatish uchun API yo'llari
+    children:
+      - url: http://127.0.0.1:8000/api/tables/
+        name: Faol stollar ro'yxatini olish
+        meta:
+          id: req_f847e9832fbe4532bbb8309ff3c5cf8a
+          created: 1782740667377
+          modified: 1782741256580
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667377
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/tables/10/occupy/
+        name: Stolni band qilish (Mijoz kelganda)
+        meta:
+          id: req_5c6ae9c5cb344800a3384a115ec01694
+          created: 1782740667378
+          modified: 1782741435758
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667378
+        method: POST
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/tables/10/free/
+        name: Stol holatini tozalashga o'tkazish
+        meta:
+          id: req_4d584aa770fc45f89a5e4cccbe198656
+          created: 1782740667379
+          modified: 1782741686961
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667379
+        method: POST
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: " http://127.0.0.1:8000/api/tables/10/mark-free/"
+        name: Stolni tozalab bo'lingach bo'shatish
+        meta:
+          id: req_fe691906da884d778c334f5a817102ab
+          created: 1782740667380
+          modified: 1782741781403
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667380
+        method: POST
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Xodimlar - Operatsiyalar va Boshqaruv paneli
+    meta:
+      id: fld_08549ea9f1834e4fa04ca66209678fd9
+      created: 1782740667372
+      modified: 1782740667372
+      sortKey: -1782740667372
+      description: Endpoints for managing staff cockpit metrics, active calls, and
+        order status updates
+    children:
+      - url: http://127.0.0.1:8000/api/staff/dashboard/
+        name: Xodimlar boshqaruv paneli metrikalarini olish (Auth kerak)
+        meta:
+          id: req_ee024ca55ba6426db5e458b99ab4912e
+          created: 1782740667395
+          modified: 1782748050612
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667395
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: basic
+          useISO88591: false
+          username: admin
+          password: admin123
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/staff/orders/
+        name: Xodimlar uchun barcha faol buyurtmalar ro'yxatini olish (Auth kerak)
+        meta:
+          id: req_34f2ebd925d146d4b289fbc8e8bca84f
+          created: 1782740667397
+          modified: 1782748293894
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667397
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        parameters:
+          - name: status
+            value: string
+            disabled: true
+        headers:
+          - name: Content-Type
+            value: application/json
+        authentication:
+          type: basic
+          useISO88591: false
+          username: admin
+          password: admin123
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/staff/calls/
+        name: Ofitsiant chaqiruvlari ro'yxatini ko'rish (Auth kerak)
+        meta:
+          id: req_bd9564d2325c4d3eaada914412955335
+          created: 1782740667399
+          modified: 1782748484563
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667399
+        method: GET
+        authentication:
+          type: basic
+          useISO88591: false
+          username: admin
+          password: admin123
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/staff/orders/31/update-status/
+        name: Buyurtmaning tayyorlanish holatini (statusini) o'zgartirish (Auth kerak)
+        meta:
+          id: req_d6efadebcb1148cdbda9c959ae6a24a2
+          created: 1782740667399
+          modified: 1782748661030
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667399
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "status": "preparing"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        authentication:
+          type: basic
+          useISO88591: false
+          username: admin
+          password: admin123
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/api/staff/calls/1/resolve/
+        name: Mijozning ofitsiant chaqiruviga javob berish (Auth kerak)
+        meta:
+          id: req_964bd31a35be43509dacc63bf0ad6d4e
+          created: 1782740667400
+          modified: 1782748819798
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667400
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "reply_message": "Xodim yo'lda 1 daqiqada boradi "
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        authentication:
+          type: basic
+          useISO88591: false
+          username: admin
+          password: admin123
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/messages/"
+        name: Telegram-chat ro'yxatini (faol stollar) ko'rish (Auth kerak)
+        meta:
+          id: req_2e7213973a4e452f89f03baa89c0647b
+          created: 1782740667401
+          modified: 1782740667401
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667401
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Mijoz - Xizmatlar va Fikr-mulohazalar
+    meta:
+      id: fld_396cc8c2e66d4e43a67886b4af4af42c
+      created: 1782740667372
+      modified: 1782740667372
+      sortKey: -1782740667372
+      description: Ofitsiantni chaqirish va stollar uchun fikr-mulohazalar yozib qoldirish API yo'llari
+    children:
+      - url: "{{ _.base_url }}/waiter-calls/call/:table_id/"
+        name: Ofitsiantni chaqirish so'rovi
+        meta:
+          id: req_9b1b9b0504a044ae90e694bdce732b59
+          created: 1782740667390
+          modified: 1782740667390
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667390
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "reason": "Mijoz chaqirdi"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/waiter-calls/latest/:table_id/"
+        name: Stol uchun oxirgi ofitsiant chaqiruvini olish
+        meta:
+          id: req_16886f08d6d34a85a983f2cc584e8b45
+          created: 1782740667391
+          modified: 1782740667391
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667391
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/waiter-calls/active/:table_id/"
+        name: Stol sessiyasi davomidagi faol chaqiruvlarni olish
+        meta:
+          id: req_ae6a5b30d99d4db5a4024ca9b5862370
+          created: 1782740667391
+          modified: 1782740667391
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667391
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/tables/:table_id/messages/"
+        name: Stol chatidagi barcha xabarlarni olish
+        meta:
+          id: req_538af73b83464da1bd1d35a7236c5663
+          created: 1782740667392
+          modified: 1782740667392
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667392
+        method: GET
+        parameters:
+          - name: mark_read
+            value: string
+            disabled: true
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/tables/:table_id/messages/send/"
+        name: Stol chatida yangi xabar yuborish
+        meta:
+          id: req_66ebd6ac38d84dc4848831c035edb911
+          created: 1782740667393
+          modified: 1782740667393
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667393
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "message": "string",
+              "sender": "customer"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/feedback/:table_id/"
+        name: Stol uchun mijoz fikr-mulohazasini yuborish
+        meta:
+          id: req_2a729ea6d88b4579a0881b502cb150cb
+          created: 1782740667394
+          modified: 1782740667394
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667394
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "rating": 0,
+              "comment": "string",
+              "menu_item_name": "string",
+              "is_anonymous": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Xodimlar - Menyuni Boshqarish
+    meta:
+      id: fld_4295f6a1b0b14671a908aaee28c8c5fd
+      created: 1782740667373
+      modified: 1782740667373
+      sortKey: -1782740667373
+      description: Endpoints for categorizing menu items, adding new dishes, and
+        uploading media images
+    children:
+      - url: "{{ _.base_url }}/staff/menu/"
+        name: Boshqaruv uchun menyu toifalarini olish (Auth kerak)
+        meta:
+          id: req_16a99a5c0b4c4a8f8af834b6f0cdb4a9
+          created: 1782740667402
+          modified: 1782740667402
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667402
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/menu/item/add/"
+        name: Menyuga yangi taom qo'shish (Auth kerak)
+        meta:
+          id: req_cca908e0f7c74b208a5433da1837bdfa
+          created: 1782740667402
+          modified: 1782740667402
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667402
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "string",
+              "category": 0,
+              "price": 0,
+              "description": "string",
+              "image": "string",
+              "images": [
+                "string"
+              ],
+              "prep_time_minutes": 0,
+              "weight_grams": 0,
+              "calories": 0,
+              "serving_options": "string",
+              "vitamins": "string",
+              "ingredients": "string",
+              "is_available": true,
+              "is_popular": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/menu/item/:item_id/edit/"
+        name: Mavjud taomni tahrirlash (Auth kerak)
+        meta:
+          id: req_c69cb0a88a6b40379f45507cc5f2a62b
+          created: 1782740667403
+          modified: 1782740667403
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667403
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "string",
+              "category": 0,
+              "price": 0,
+              "description": "string",
+              "is_available": true,
+              "image": "string",
+              "images": [
+                "string"
+              ],
+              "prep_time_minutes": 0,
+              "weight_grams": 0,
+              "calories": 0,
+              "serving_options": "string",
+              "vitamins": "string",
+              "ingredients": "string",
+              "is_popular": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/menu/item/:item_id/delete/"
+        name: Taomni bazadan butunlay o'chirib tashlash (Auth kerak)
+        meta:
+          id: req_b53630eac43b4683b19a0526d17047f6
+          created: 1782740667404
+          modified: 1782740667404
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667404
+        method: POST
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/upload-image/"
+        name: Lokal rasm faylini media jildiga yuklash (Auth kerak)
+        meta:
+          id: req_45b976c5914047948cfcdb4ee7556740
+          created: 1782740667405
+          modified: 1782740667405
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667405
+        method: POST
+        body:
+          mimeType: multipart/form-data
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Xodimlar - Stollarni Boshqarish
+    meta:
+      id: fld_40f477a4da5a4c829e177883b84ed3f9
+      created: 1782740667374
+      modified: 1782740667374
+      sortKey: -1782740667374
+      description: Yangi jismoniy stollar qo'shish va holatlarni qo'lda o'zgartirish API yo'llari
+    children:
+      - url: "{{ _.base_url }}/staff/tables/"
+        name: Stollarni boshqarish uchun barcha stollarni olish (Auth kerak)
+        meta:
+          id: req_ea991909edd947f6a6ada77d90884586
+          created: 1782740667406
+          modified: 1782740667406
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667406
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/tables/add/"
+        name: Yangi jismoniy stol qo'shish (Auth kerak)
+        meta:
+          id: req_e8a3c61f81434a3b901743efcc2a651d
+          created: 1782740667407
+          modified: 1782740667407
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667407
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "number": 0
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/tables/:table_id/status/"
+        name: Jismoniy stol holatini yangilash (Auth kerak)
+        meta:
+          id: req_b47c7824569e4a1da857a8a61f88b465
+          created: 1782740667409
+          modified: 1782740667409
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667409
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "status": "string"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/staff/tables/:table_id/delete/"
+        name: Jismoniy stolni bazadan butunlay o'chirish (Auth kerak)
+        meta:
+          id: req_aed6bbb69592427faee43ff26bdfe4b7
+          created: 1782740667410
+          modified: 1782740667410
+          isPrivate: false
+          description: ""
+          sortKey: -1782740667410
+        method: POST
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_298c2424fdbd5553e953647fdf871fa604cbe7a6
+    created: 1782740667784
+    modified: 1782748499255
+  cookies:
+    - id: 82591bb7-aca1-4649-bc0c-1293b5679d92
+      key: sessionid
+      value: h7cxii3a7dqblfepa1et0rxa8gioyen5
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: true
+      hostOnly: true
+    - id: ad5ff195-1622-4561-99ba-cc9b1ff09d09
+      key: csrftoken
+      value: rBXusPVdjAqmrrdc8Xl8gASkGLuAZlCx
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: false
+      hostOnly: true
+environments:
+  name: Base environment
+  meta:
+    id: env_083948b66ec4428bbb80d9deee6c30d2
+    created: 1782740667364
+    modified: 1782740667364
+    isPrivate: false
+  data:
+    base_url: "{{ _.scheme }}://{{ _.host }}{{ _.base_path }}"
+  subEnvironments:
+    - name: OpenAPI env 127.0.0.1:8000
+      meta:
+        id: env_38af327e590d489eab5345592d18ab1e
+        created: 1782740667365
+        modified: 1782740667365
+        isPrivate: false
+        sortKey: 1782740667365
+      data:
+        scheme: http
+        base_path: /api
+        host: 127.0.0.1:8000
+spec:
+  contents:
+    openapi: 3.0.3
+    info:
+      title: Smart Cafe API Specification
+      description: API endpoints for customer and staff management systems in Smart
+        Cafe project.
+      version: 1.0.0
+    servers:
+      - url: http://127.0.0.1:8000/api
+        description: Local development server
+    tags:
+      - name: Mijoz - Umumiy
+        description: Reklama, statistika va faol ofitsiantlar ro'yxati kabi umumiy yordamchi API yo'llari
+      - name: Mijoz - Stollar
+        description: Stol tanlash, holatni kuzatish va sessiyani o'rnatish uchun API yo'llari
+      - name: Mijoz - Menyu
+        description: Kategoriyalarni ko'rish va batafsil taom kartalari uchun API yo'llari
+      - name: Mijoz - Savatcha va Buyurtma
+        description: Endpoints for managing table-specific carts, orders, and checkout
+          payments
+      - name: Mijoz - Xizmatlar va Fikr-mulohazalar
+        description: Ofitsiantni chaqirish va stollar uchun fikr-mulohazalar yozib qoldirish API yo'llari
+      - name: Xodimlar - Operatsiyalar va Boshqaruv paneli
+        description: Endpoints for managing staff cockpit metrics, active calls, and
+          order status updates
+      - name: Xodimlar - Menyuni Boshqarish
+        description: Endpoints for categorizing menu items, adding new dishes, and
+          uploading media images
+      - name: Xodimlar - Stollarni Boshqarish
+        description: Yangi jismoniy stollar qo'shish va holatlarni qo'lda o'zgartirish API yo'llari
+    paths:
+      /home-stats/:
+        get:
+          tags:
+            - Mijoz - Umumiy
+          summary: Bosh sahifa uchun umumiy statistikalarni olish
+          responses:
+            "200":
+              description: Success
+      /advertisements/:
+        get:
+          tags:
+            - Mijoz - Umumiy
+          summary: Faol reklamalar ro'yxatini olish
+          responses:
+            "200":
+              description: Success
+      /waiters/:
+        get:
+          tags:
+            - Mijoz - Umumiy
+          summary: Faol ofitsiantlar ro'yxatini olish
+          responses:
+            "200":
+              description: Success
+      /tables/:
+        get:
+          tags:
+            - Mijoz - Stollar
+          summary: Faol stollar ro'yxatini olish
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/occupy/:
+        post:
+          tags:
+            - Mijoz - Stollar
+          summary: Stolni band qilish (Mijoz kelganda)
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/free/:
+        post:
+          tags:
+            - Mijoz - Stollar
+          summary: Stol holatini tozalashga o'tkazish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/mark-free/:
+        post:
+          tags:
+            - Mijoz - Stollar
+          summary: Stolni tozalab bo'lingach bo'shatish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /categories/:
+        get:
+          tags:
+            - Mijoz - Menyu
+          summary: Faol menyu kategoriyalari va taomlar ro'yxatini olish
+          responses:
+            "200":
+              description: Success
+      /menu-items/{item_id}/:
+        get:
+          tags:
+            - Mijoz - Menyu
+          summary: Bitta aniq taom haqida batafsil ma'lumot olish
+          parameters:
+            - name: item_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /cart/{table_id}/:
+        get:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Stolning savatidagi taomlarni ko'rish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /cart/{table_id}/add/:
+        post:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Savatga yangi taom qo'shish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - item_id
+                  properties:
+                    item_id:
+                      type: integer
+                    servings:
+                      type: integer
+                      default: 1
+                    quantity:
+                      type: integer
+                      default: 1
+                    notes:
+                      type: string
+          responses:
+            "200":
+              description: Success
+      /cart/{table_id}/remove/{cart_index}/:
+        post:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Savatdan taomni o'chirish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+            - name: cart_index
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /cart/{table_id}/checkout/:
+        post:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Savatchadagi taomlarga buyurtma berish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    notes:
+                      type: string
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/orders/:
+        get:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Stolning joriy faol buyurtmalari ro'yxatini olish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /orders/{order_id}/:
+        get:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Bitta aniq buyurtmaning to'liq tafsilotlarini ko'rish
+          parameters:
+            - name: order_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /orders/{order_id}/complete/:
+        post:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Buyurtmani yakunlangan deb belgilash va stolni bo'shatish
+          parameters:
+            - name: order_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /orders/{order_id}/payment/process/:
+        post:
+          tags:
+            - Mijoz - Savatcha va Buyurtma
+          summary: Buyurtma uchun to'lov qilish jarayoni (simulyatsiyasi)
+          parameters:
+            - name: order_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    method:
+                      type: string
+                      enum:
+                        - cash
+                        - card
+                        - click
+                        - payme
+                        - uzum
+                      default: cash
+          responses:
+            "200":
+              description: Success
+      /waiter-calls/call/{table_id}/:
+        post:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Ofitsiantni chaqirish so'rovi
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    reason:
+                      type: string
+                      default: Mijoz chaqirdi
+          responses:
+            "200":
+              description: Success
+      /waiter-calls/latest/{table_id}/:
+        get:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Stol uchun oxirgi ofitsiant chaqiruvini olish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /waiter-calls/active/{table_id}/:
+        get:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Stol sessiyasi davomidagi faol chaqiruvlarni olish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/messages/:
+        get:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Stol chatidagi barcha xabarlarni olish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+            - name: mark_read
+              in: query
+              required: false
+              schema:
+                type: string
+                enum:
+                  - true
+                  - false
+          responses:
+            "200":
+              description: Success
+      /tables/{table_id}/messages/send/:
+        post:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Stol chatida yangi xabar yuborish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - message
+                  properties:
+                    message:
+                      type: string
+                    sender:
+                      type: string
+                      enum:
+                        - customer
+                        - staff
+                      default: customer
+          responses:
+            "200":
+              description: Success
+      /feedback/{table_id}/:
+        post:
+          tags:
+            - Mijoz - Xizmatlar va Fikr-mulohazalar
+          summary: Stol uchun mijoz fikr-mulohazasini yuborish
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - rating
+                  properties:
+                    rating:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                    comment:
+                      type: string
+                    menu_item_name:
+                      type: string
+                    is_anonymous:
+                      type: boolean
+                      default: false
+          responses:
+            "200":
+              description: Success
+      /staff/dashboard/:
+        get:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Xodimlar boshqaruv paneli metrikalarini olish (Auth kerak)
+          responses:
+            "200":
+              description: Success
+      /staff/orders/:
+        get:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Xodimlar uchun barcha faol buyurtmalar ro'yxatini olish (Auth kerak)
+          parameters:
+            - name: status
+              in: query
+              required: false
+              schema:
+                type: string
+          responses:
+            "200":
+              description: Success
+      /staff/orders/{order_id}/update-status/:
+        post:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Buyurtmaning tayyorlanish holatini (statusini) o'zgartirish (Auth kerak)
+          parameters:
+            - name: order_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - status
+                  properties:
+                    status:
+                      type: string
+                      enum:
+                        - pending
+                        - confirmed
+                        - preparing
+                        - ready
+                        - delivered
+                        - completed
+                        - cancelled
+          responses:
+            "200":
+              description: Success
+      /staff/calls/:
+        get:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Ofitsiant chaqiruvlari ro'yxatini ko'rish (Auth kerak)
+          responses:
+            "200":
+              description: Success
+      /staff/calls/{call_id}/resolve/:
+        post:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Mijozning ofitsiant chaqiruviga javob berish (Auth kerak)
+          parameters:
+            - name: call_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    reply_message:
+                      type: string
+                      default: Xodim yo'lda
+          responses:
+            "200":
+              description: Success
+      /staff/messages/:
+        get:
+          tags:
+            - Xodimlar - Operatsiyalar va Boshqaruv paneli
+          summary: Get active chat contact list of tables with messages (requires staff
+            login)
+          responses:
+            "200":
+              description: Success
+      /staff/menu/:
+        get:
+          tags:
+            - Xodimlar - Menyuni Boshqarish
+          summary: Boshqaruv uchun menyu toifalarini olish (Auth kerak)
+          responses:
+            "200":
+              description: Success
+      /staff/menu/item/add/:
+        post:
+          tags:
+            - Xodimlar - Menyuni Boshqarish
+          summary: Menyuga yangi taom qo'shish (Auth kerak)
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - name
+                    - category
+                    - price
+                  properties:
+                    name:
+                      type: string
+                    category:
+                      type: integer
+                      description: Category ID
+                    price:
+                      type: number
+                    description:
+                      type: string
+                    image:
+                      type: string
+                    images:
+                      type: array
+                      items:
+                        type: string
+                      description: List of uploaded image URLs (max 10)
+                    prep_time_minutes:
+                      type: integer
+                    weight_grams:
+                      type: integer
+                    calories:
+                      type: integer
+                    serving_options:
+                      type: string
+                      description: Comma-separated portion options, e.g. "1, 1.5, 2"
+                    vitamins:
+                      type: string
+                    ingredients:
+                      type: string
+                    is_available:
+                      type: boolean
+                    is_popular:
+                      type: boolean
+          responses:
+            "200":
+              description: Success
+      /staff/menu/item/{item_id}/edit/:
+        post:
+          tags:
+            - Xodimlar - Menyuni Boshqarish
+          summary: Mavjud taomni tahrirlash (Auth kerak)
+          parameters:
+            - name: item_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    category:
+                      type: integer
+                    price:
+                      type: number
+                    description:
+                      type: string
+                    is_available:
+                      type: boolean
+                    image:
+                      type: string
+                    images:
+                      type: array
+                      items:
+                        type: string
+                      description: List of uploaded image URLs (max 10)
+                    prep_time_minutes:
+                      type: integer
+                    weight_grams:
+                      type: integer
+                    calories:
+                      type: integer
+                    serving_options:
+                      type: string
+                    vitamins:
+                      type: string
+                    ingredients:
+                      type: string
+                    is_popular:
+                      type: boolean
+          responses:
+            "200":
+              description: Success
+      /staff/menu/item/{item_id}/delete/:
+        post:
+          tags:
+            - Xodimlar - Menyuni Boshqarish
+          summary: Taomni bazadan butunlay o'chirib tashlash (Auth kerak)
+          parameters:
+            - name: item_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+      /staff/upload-image/:
+        post:
+          tags:
+            - Xodimlar - Menyuni Boshqarish
+          summary: Lokal rasm faylini media jildiga yuklash (Auth kerak)
+          requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  required:
+                    - image
+                  properties:
+                    image:
+                      type: string
+                      format: binary
+                      description: The image file to upload
+          responses:
+            "200":
+              description: Success
+      /staff/tables/:
+        get:
+          tags:
+            - Xodimlar - Stollarni Boshqarish
+          summary: Stollarni boshqarish uchun barcha stollarni olish (Auth kerak)
+          responses:
+            "200":
+              description: Success
+      /staff/tables/add/:
+        post:
+          tags:
+            - Xodimlar - Stollarni Boshqarish
+          summary: Yangi jismoniy stol qo'shish (Auth kerak)
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - number
+                  properties:
+                    number:
+                      type: integer
+          responses:
+            "200":
+              description: Success
+      /staff/tables/{table_id}/status/:
+        post:
+          tags:
+            - Xodimlar - Stollarni Boshqarish
+          summary: Jismoniy stol holatini yangilash (Auth kerak)
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            "200":
+              description: Success
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - status
+                  properties:
+                    status:
+                      type: string
+                      enum:
+                        - free
+                        - occupied
+                        - reserved
+                        - cleaning
+      /staff/tables/{table_id}/delete/:
+        post:
+          tags:
+            - Xodimlar - Stollarni Boshqarish
+          summary: Jismoniy stolni bazadan butunlay o'chirish (Auth kerak)
+          parameters:
+            - name: table_id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            "200":
+              description: Success
+  meta:
+    id: spc_e84f9d3a68014ae69b7111f43da89ff6
+    created: 1782740667361
+    modified: 1782740667361
