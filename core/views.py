@@ -68,3 +68,16 @@ def debug_view(request):
         output.append(f"Permission check error: {e}")
         
     return HttpResponse("<pre>" + "\n".join(output) + "</pre>")
+
+
+def swagger_ui(request):
+    return render(request, 'core/swagger.html')
+
+
+def swagger_schema(request):
+    import os
+    from django.conf import settings
+    schema_path = os.path.join(settings.BASE_DIR, 'openapi.yaml')
+    with open(schema_path, 'r', encoding='utf-8') as f:
+        schema_content = f.read()
+    return HttpResponse(schema_content, content_type='text/yaml')

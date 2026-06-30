@@ -24,4 +24,6 @@ urlpatterns = [
     path('staff/tables/', admin_views.table_management, name='staff_tables'),
     path('staff/messages/', admin_views.staff_messages, name='staff_messages'),
     path('api/debug/', views.debug_view, name='debug_view'),
+    path('swagger/', views.swagger_ui, name='swagger_ui'),
+    path('swagger/schema/', views.swagger_schema, name='swagger_schema'),
 ]
